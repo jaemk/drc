@@ -2,16 +2,16 @@
 
 {% block content %}
 
-    <h3> DRC Search Results </h3>
+    <h3> DRC Drawing Search Results </h3>
     <br/>
-    <a href="{% url 'tracking:search' %}">Return to Search</a>
+    <a href="{% url 'tracking:drawing_search' %}">Return to Drawing Search</a>
     <br/>
     <br/>
 
     {% if drawings %}
     <ul>
         {% for drawing in drawings %}
-        <li><a href="{% url 'tracking:drawing_detail' drawing.name %}">{{drawing.name}}</a></li>
+        <li><a href="{% url 'tracking:drawing_detail' drawing.name %}">{{drawing.name.upper}}</a></li>
         {% endfor %}
     </ul>
     {% else %}

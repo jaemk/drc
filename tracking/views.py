@@ -50,7 +50,7 @@ def _pull_drawings(formdat):
 
 
 @login_required(login_url='/accounts/login')
-def search(request):
+def drawing_search(request):
     username = _get_username(request)
     drawings = False
     if request.method == 'POST':
@@ -68,8 +68,8 @@ def search(request):
     context = {'username':username, 'form':form.as_table(), 
                'drawings':drawings}
     if drawings != False:
-        return render(request, 'tracking/results.html', context)
-    return render(request, 'tracking/search.html', context)
+        return render(request, 'tracking/drawing_results.html', context)
+    return render(request, 'tracking/drawing_search.html', context)
 
 
 @login_required(login_url='/accounts/login')

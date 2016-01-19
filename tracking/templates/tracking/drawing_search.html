@@ -2,14 +2,15 @@
 
 {% block content %}
 
-    <h3> DRC Search </h3>
+    <h3> DRC Drawing Search </h3>
     <br/>
 
     <br/>
-    <p> Note: use * for wildcard </p>
+    <p> Note: use * for wildcard <br/>
+        Only Drawing name is required </p>
     </br>
     <table>
-        <form action="/tracking/search/" method="post">
+        <form action="/tracking/drawing/search/" method="post">
             {% csrf_token %}
             {{ form }}
             <input type="submit" value="Submit" />
