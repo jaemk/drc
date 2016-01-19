@@ -7,21 +7,36 @@ import datetime
 class Block(models.Model):
     name = models.CharField(max_length=150)
 
+    def __repr__(self):
+        return '<Block: {}>'.format(self.name)
+
 
 class DrawingStatus(models.Model):
     status = models.CharField(max_length=150)
+
+    def __repr__(self):
+        return '<DwgStatus: {}>'.format(self.status)
 
 
 class Department(models.Model):
     name = models.CharField(max_length=150)
 
+    def __repr__(self):
+        return '<Dep.: {}>'.format(self.name)
+
 
 class Discipline(models.Model):
     name = models.CharField(max_length=150)
 
+    def __repr__(self):
+        return '<Disc.: {}>'.format(self.name)
+
 
 class DrawingKind(models.Model):
     name = models.CharField(max_length=150)
+
+    def __repr__(self):
+        return '<DwgKind: {}>'.format(self.name)
 
 
 class Drawing(models.Model):
@@ -48,6 +63,9 @@ class Drawing(models.Model):
     mod_by = models.ForeignKey(User, on_delete=models.SET_NULL,
                                      blank=True, null=True)
 
+    def __repr__(self):
+        return '<Drawing: {}>'.format(self.name)
+
     def newest_rev(self):
         ''' Return most recent revision object '''
         pass
@@ -70,6 +88,9 @@ class Revision(models.Model):
     mod_date = models.DateTimeField(auto_now=True, null=True)
     mod_by = models.ForeignKey(User, on_delete=models.SET_NULL,
                                      blank=True, null=True)
+
+    def __repr__(self):
+        return '<Rev: {} on {}>'.format(self.number, self.drawing.name)
 
     def newest_comment(self):
         ''' Return most recent comment '''

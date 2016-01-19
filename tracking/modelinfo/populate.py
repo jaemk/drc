@@ -86,28 +86,62 @@ def add_drawing_statuses():
             added.append(item)
             print('  -> Added Dwg Status: {}'.format(item))
     print('->> Total added: {}'.format(len(added) - len(prev)))
-    
+
 
 def add_departments():
     info = _parse_file(name=department_file, headers=False)
-    print(info)
-    # new_dep = Department(name='')
+    keyval = department_file.split('.')[0]
+    already = Department.objects.all()
+    prev = [dep.name for dep in already]
+    added = prev[:]
+    print('->> Total already in: {}'.format(len(added)))
+    for item in info[keyval]:
+        if item not in added:
+            new_dep = Department(name=item)
+            new_dep.save()
+            added.append(item)
+            print('  -> Added Department: {}'.format(item))
+    print('->> Total added: {}'.format(len(added) - len(prev)))
 
 
 def add_disciplines():
     info = _parse_file(name=discipline_file, headers=False)
-    print(info)
-    # new_disc = Discipline(name='')
+    keyval = discipline_file.split('.')[0]
+    already = Discipline.objects.all()
+    prev = [disc.name for disc in already]
+    added = prev[:]
+    print('->> Total already in: {}'.format(len(added)))
+    for item in info[keyval]:
+        if item not in added:
+            new_disc = Discipline(name=item)
+            new_disc.save()
+            added.append(item)
+            print('  -> Added Discipline: {}'.format(item))
+    print('->> Total added: {}'.format(len(added) - len(prev)))
 
 
 def add_drawing_kinds():
     info = _parse_file(name=drawing_kinds_file, headers=False)
-    print(info)
-    # new_dwg_kind = DrawingKind(name='')
+    keyval = drawing_kinds_file.split('.')[0]
+    already = DrawingKind.objects.all()
+    prev = [dwg_kind.name for dwg_kind in already]
+    added = prev[:]
+    print('->> Total already in: {}'.format(len(added)))
+    for item in info[keyval]:
+        if item not in added:
+            new_dwg_kind = DrawingKind(name=item)
+            new_dwg_kind.save()
+            added.append(item)
+            print('  -> Added Dwg Kind: {}'.format(item))
+    print('->> Total added: {}'.format(len(added) - len(prev)))
 
 
 def add_drawings():
     info = _parse_file(name=drawing_file, headers=True)
     print(' | '.join(['{}:{}'.format(key, val[0]) for key, val in info.items()]))
+
+    total = len(info[[i for i in info.keys()][0]])
+    
+    
     # new_dwg = Drawing(name='',
     #                   desc='')
