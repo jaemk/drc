@@ -56,15 +56,37 @@ def _parse_file(name=None, headers=True):
 
 
 def add_blocks():
+    print('Populating Blocks...')
     info = _parse_file(name=block_file, headers=False)
-    print(info)
-    # new_block = Block(name='')
+    keyval = block_file.split('.')[0]
+    already = Block.objects.all()
+    prev = [block.name for block in already]
+    added = prev[:]
+    print('->> Total already in: {}'.format(len(added)))
+    for item in info[keyval]:
+        if item not in added:
+            new_block = Block(name=item)
+            new_block.save()
+            added.append(item)
+            print('  -> Added Block: {}'.format(item))
+    print('->> Total added: {}'.format(len(added) - len(prev)))
 
 
 def add_drawing_statuses():
     info = _parse_file(name=drawing_status_file, headers=False)
-    print(info)
-    # new_dwg_status = DrawingStatus(status='')
+    keyval = drawing_status_file.split('.')[0]
+    already = DrawingStatus.objects.all()
+    prev = [dwg_st.status for dwg_st in already]
+    added = prev[:]
+    print('->> Total already in: {}'.format(len(added)))
+    for item in info[keyval]:
+        if item not in added:
+            new_dwg_status = DrawingStatus(status=item)
+            new_dwg_status.save()
+            added.append(item)
+            print('  -> Added Dwg Status: {}'.format(item))
+    print('->> Total added: {}'.format(len(added) - len(prev)))
+    
 
 def add_departments():
     info = _parse_file(name=department_file, headers=False)
