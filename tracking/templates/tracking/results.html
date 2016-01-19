@@ -1,0 +1,21 @@
+{% extends 'tracking/base.html' %}
+
+{% block content %}
+
+    <h3> DRC Search Results </h3>
+    <br/>
+    <a href="{% url 'tracking:search' %}">Return to Search</a>
+    <br/>
+    <br/>
+
+    {% if drawings %}
+    <ul>
+        {% for drawing in drawings %}
+        <li><a href="{% url 'tracking:drawing_detail' drawing.name %}">{{drawing.name}}</a></li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>No drawings found...</p>
+    {% endif %}
+
+{% endblock %}

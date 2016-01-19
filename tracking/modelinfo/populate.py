@@ -11,6 +11,7 @@ from ..models import Reply
 import os
 import datetime
 from django.utils import timezone
+import pytz
 
 location = os.path.dirname(os.path.realpath(__file__))
 block_file = 'blocks.csv'
@@ -176,7 +177,7 @@ def add_drawings():
 
 def add_expected_dates():
     info = _parse_file(name=expected_dates_file, headers=True)
-    current_tz = timezone.get_current_timezone()
+    current_tz = pytz.timezone("America/New_York")
     for i in range(len(info['name'])):
         name = info['name'][i]
         if name:
@@ -184,12 +185,14 @@ def add_expected_dates():
             exp_date = None
             if info['date'][i]:
                 date = info['date'][i]
-                try:
-                    exp_date = current_tz(datetime.datetime.strptime(date, '%d/%m/%Y'))
-                except:
-                    pass
+                exp_date = current_tz.localize(datetime.datetime.strptime(date, '%m/%d/%Y'))
+                
 
-            Drawing.objects.filter(name=name).update(expected=exp_date)
+            if Drawing.objects.filter(name=name).exists(): 
+                d = Drawing.objects.get(name=name)
+                d.expected = exp_date
+                d.save()
+                #update(expected=exp_date)
             print(' -> updated {} with date {}'.format(name, date))
         
 

@@ -40,24 +40,50 @@ def index(request):
     # return httpresp('Welcome to DRC tracking index')
 
 
+
+def _pull_drawings(formdat):
+    if not formdat['drawing_name']:
+        return None
+    dquery = Drawing.objects.filter(name__contains=formdat['drawing_name'])
+    return dquery
+
+
 @login_required(login_url='/accounts/login')
 def search(request):
     username = _get_username(request)
+    drawings = False
     if request.method == 'POST':
         form = SearchForm(request.POST)
         if form.is_valid():
-            pass
+            drawings = _pull_drawings(form.cleaned_data)
             # full_name = _add_student(username, form.cleaned_data)
             # student = Student.objects.get(full_name=full_name)
 
         # return httprespred('/tracking/search/results{}'.format())
-        return httprespred('/tracking/')
+        # return httprespred('/tracking/')
     else:
         form = SearchForm()
 
-    context = {'username':username, 'form':form.as_table()}
+    context = {'username':username, 'form':form.as_table(), 
+               'drawings':drawings}
+    if drawings != False:
+        return render(request, 'tracking/results.html', context)
     return render(request, 'tracking/search.html', context)
 
+
+@login_required(login_url='/accounts/login')
+def drawing_detail(request, drawing_name):
+    info = Drawing.objects.get(name=drawing_name.lower())
+    return httpresp('detail for {}<br/><br/>{}'\
+                    .format(drawing_name, 
+                            [info.desc,
+                                       info.phase,
+                                       info.block.name,
+                                       info.status.status,
+                                       info.department.name,
+                                       info.discipline.name,
+                                       info.kind.name,
+                                       info.expected]))
 
 # def detail_pdf(request, question_id):
 #     try:
