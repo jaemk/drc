@@ -1,0 +1,16 @@
+{% extends 'tracking/base.html' %}
+
+{% block content %}
+
+    <h1> DRC Search </h1>
+    <br/>
+
+    <table>
+        <form action="/tracking/search/" method="post">
+            {% csrf_token %}
+            {{ form }}
+            <input type="submit" value="Submit" />
+        </form>
+    </table>
+
+{% endblock %}

@@ -1,0 +1,8 @@
+*.swo
+*.swp
+*.pyc
+*__pycache__*
+*.csv
+*manage.py
+*settings.py
+*uploads/

@@ -1,0 +1,38 @@
+{% load staticfiles %}
+<html>
+    <head>
+        <title> DRC Tracking </title>
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+        <!--    <link href='//fonts.googleapis.com/css?family=Lobster&subset=latin,latin-ext' rel='stylesheet' type='text/css'> -->
+        <link rel="stylesheet" href="{% static 'css/tracking.css' %}">
+    </head>
+    <body>
+        <div>
+            <h1><a href="/tracking/">DRC</a></h1>
+        </div>
+        <div>
+            <p style='text-align:left; margin-left:10px; margin-right:10px'>
+            <a href='/tracking/'>Drawings </a> |
+            <a href='/tracking/'> Revisions </a> | 
+            <a href='/tracking/'> Comments </a> | 
+            <a href='/'> Home </a>
+                <span style='float:right'>        
+                    <a href='/accounts/login?next=/tracking/'> Login </a> | 
+                    <a href='/accounts/logout'> Logout</a>
+                    <br/>
+                    {% if username  %}
+                        Logged in as: {{ username }}
+                    {% else %}
+                        Not logged in
+                    {% endif %}
+                </span>
+            </p>
+            {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+
+            {% block content %}
+            {% endblock %}
+        </div>
+    </body>
+</html>
