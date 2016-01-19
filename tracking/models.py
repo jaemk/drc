@@ -10,12 +10,18 @@ class Block(models.Model):
     def __repr__(self):
         return '<Block: {}>'.format(self.name)
 
+    def __str__(self):
+        return 'Block: {}'.format(self.name.upper())
+
 
 class DrawingStatus(models.Model):
     status = models.CharField(max_length=150)
 
     def __repr__(self):
         return '<DwgStatus: {}>'.format(self.status)
+
+    def __str__(self):
+        return 'DwgStatus: {}'.format(self.status.title())
 
 
 class Department(models.Model):
@@ -24,6 +30,9 @@ class Department(models.Model):
     def __repr__(self):
         return '<Dep.: {}>'.format(self.name)
 
+    def __str__(self):
+        return 'Dep: {}'.format(self.name)
+
 
 class Discipline(models.Model):
     name = models.CharField(max_length=150)
@@ -31,12 +40,18 @@ class Discipline(models.Model):
     def __repr__(self):
         return '<Disc.: {}>'.format(self.name)
 
+    def __str__(self):
+        return 'Discip: {}'.format(self.name.title())
+
 
 class DrawingKind(models.Model):
     name = models.CharField(max_length=150)
 
     def __repr__(self):
         return '<DwgKind: {}>'.format(self.name)
+
+    def __str__(self):
+        return 'DwgKind: {}'.format(self.name.title())
 
 
 class Drawing(models.Model):
@@ -66,6 +81,9 @@ class Drawing(models.Model):
     def __repr__(self):
         return '<Drawing: {}>'.format(self.name)
 
+    def __str__(self):
+        return 'Drawing: {}'.format(self.name.upper())
+
     def newest_rev(self):
         ''' Return most recent revision object '''
         pass
@@ -92,6 +110,9 @@ class Revision(models.Model):
     def __repr__(self):
         return '<Rev: {} on {}>'.format(self.number, self.drawing.name)
 
+    def __str__(self):
+        return 'Rev: {} on dwg: {}'.format(self.number.upper(), self.drawing.name.upper())
+
     def newest_comment(self):
         ''' Return most recent comment '''
         pass
@@ -103,6 +124,7 @@ class Revision(models.Model):
 
 class Comment(models.Model):
     desc = models.CharField(max_length=500, blank=True, null=True)
+    text = models.CharField(max_length=1000, blank=True, null=True)
     status = models.BooleanField(default=True)
     owner = models.ForeignKey(User, on_delete=models.SET_NULL,
                               related_name='comment_owner',
@@ -119,9 +141,16 @@ class Comment(models.Model):
                                related_name='comment_mod_by',
                                blank=True, null=True)
 
+    def __repr__(self):
+        return '<Comm: {} on {}>'.format(self.id, self.revision)
+
+    def __str__(self):
+        return 'Comment by {} on - {}'.format(self.owner, self.revision)
+
 
 class Reply(models.Model):
     desc = desc = models.CharField(max_length=500, blank=True, null=True)
+    text = models.CharField(max_length=1000, blank=True, null=True)
     comment = models.ForeignKey(Comment, on_delete=models.SET_NULL,
                                 blank=True, null=True)
     owner = models.ForeignKey(User, on_delete=models.SET_NULL,
@@ -137,3 +166,8 @@ class Reply(models.Model):
                                related_name='reply_mod_by',
                                blank=True, null=True)
 
+    def __repr__(self):
+        return '<Reply: {} on com. {}>'.format(self.id, self.comment)
+
+    def __str__(self):
+        return 'Reply to: {}'.format(self.comment)

@@ -9,6 +9,8 @@ from ..models import Comment
 from ..models import Reply
 
 import os
+import datetime
+from django.utils import timezone
 
 location = os.path.dirname(os.path.realpath(__file__))
 block_file = 'blocks.csv'
@@ -41,7 +43,8 @@ def _parse_file(name=None, headers=True):
         return None
     file_path = os.path.join(location, name)
     with open(file_path, 'r') as f:
-        info_raw = [line.strip('\n').strip() for line in f if line.strip('\n').strip() != '']
+        info_raw = [line.strip('\n').strip() for line in f\
+                        if line.strip('\n').strip() != '']
 
     if headers:
         head_raw = info_raw.pop(0)
@@ -142,6 +145,51 @@ def add_drawings():
 
     total = len(info[[i for i in info.keys()][0]])
     
-    
-    # new_dwg = Drawing(name='',
-    #                   desc='')
+    added = 0
+    for i in range(total):
+        name = info['name'][i].lower()
+        if not Drawing.objects.filter(name=name).exists():
+            print(info['block'][i])
+            block = Block.objects.get(name=info['block'][i]) if info['block'][i] \
+                                                             and info['block'][i] != '0'\
+                                                             and info['block'][i] != 'none'\
+                                                             else None
+            status = DrawingStatus.objects.get(status='new')
+            dep = Department.objects.get(name=info['department'][i]) if info['department'][i] else None
+            disc = Discipline.objects.get(name=info['discipline'][i]) if info['discipline'][i] else None
+            kind = DrawingKind.objects.get(name=info['kind'][i]) if info['kind'][i] else None
+            new_dwg = Drawing(name=name,
+                              desc=info['desc'][i] if info['desc'][i] else None,
+                              phase=info['phase'][i] if info['phase'][i] else None,
+                              block=block,
+                              status=status,
+                              department=dep,
+                              discipline=disc,
+                              kind=kind,
+                              )
+            new_dwg.save()
+            added += 1
+            print('  -> Added Drawing: {}'.format(name))
+
+    print('->> Total Added: {}'.format(added))
+
+
+def add_expected_dates():
+    info = _parse_file(name=expected_dates_file, headers=True)
+    current_tz = timezone.get_current_timezone()
+    for i in range(len(info['name'])):
+        name = info['name'][i]
+        if name:
+            date = None
+            exp_date = None
+            if info['date'][i]:
+                date = info['date'][i]
+                try:
+                    exp_date = current_tz(datetime.datetime.strptime(date, '%d/%m/%Y'))
+                except:
+                    pass
+
+            Drawing.objects.filter(name=name).update(expected=exp_date)
+            print(' -> updated {} with date {}'.format(name, date))
+        
+
