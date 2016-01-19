@@ -44,7 +44,8 @@ def index(request):
 def _pull_drawings(formdat):
     if not formdat['drawing_name']:
         return None
-    dquery = Drawing.objects.filter(name__contains=formdat['drawing_name'])
+    qstr = '^{}$'.format(formdat['drawing_name'].replace('*','.*'))
+    dquery = Drawing.objects.filter(name__regex=qstr)
     return dquery
 
 

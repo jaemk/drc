@@ -185,7 +185,7 @@ def add_expected_dates():
             exp_date = None
             if info['date'][i]:
                 date = info['date'][i]
-                exp_date = current_tz.localize(datetime.datetime.strptime(date, '%m/%d/%Y'))
+                exp_date = current_tz.localize(datetime.datetime.strptime(date, '%m/%d/%Y'), is_dst=None)
                 
 
             if Drawing.objects.filter(name=name).exists(): 
@@ -193,6 +193,6 @@ def add_expected_dates():
                 d.expected = exp_date
                 d.save()
                 #update(expected=exp_date)
-            print(' -> updated {} with date {}'.format(name, date))
+            print(' -> updated {} with date {}'.format(name, exp_date))
         
 
