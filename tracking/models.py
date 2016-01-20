@@ -54,10 +54,12 @@ class DrawingKind(models.Model):
         return 'DwgKind: {}'.format(self.name.title())
 
 
+
 class Drawing(models.Model):
     name = models.CharField(max_length=250)
     desc = models.CharField(max_length=500, blank=True, null=True)
     phase = models.CharField(max_length=25, blank=True, null=True)
+    received = models.BooleanField(default=False)
     block = models.ForeignKey(Block, on_delete=models.SET_NULL,
                               blank=True, null=True)
     status = models.ForeignKey(DrawingStatus, on_delete=models.SET_NULL,
@@ -68,10 +70,7 @@ class Drawing(models.Model):
                                     blank=True, null=True)
     kind = models.ForeignKey(DrawingKind, on_delete=models.SET_NULL,
                                     blank=True, null=True)
-    attachments = models.FileField(upload_to='uploads/drawings',
-                                   blank=True) # default='settings.BASE_DIR/pdfs/file.pdf')
-    
-    # date stuff
+
     expected = models.DateTimeField(null=True)
     add_date = models.DateTimeField(auto_now=True)
     mod_date = models.DateTimeField(auto_now=True, null=True)
@@ -84,6 +83,10 @@ class Drawing(models.Model):
     def __str__(self):
         return 'Drawing: {}'.format(self.name.upper())
 
+    def get_attachments(self):
+        att = DrawingAttachment.objects.filter(drawing__id=self.id)
+        return att
+
     def newest_rev(self):
         ''' Return most recent revision object '''
         pass
@@ -91,6 +94,21 @@ class Drawing(models.Model):
     def revisions(self):
         ''' Return all revision objects '''
         pass
+
+
+def drawing_upload_path(instance, filename):
+    # upload to MEDIA_ROOT/<filename>_<userid>_<date>
+    time = timezone.now()
+    return 'drawing/{}_{}_{}'.format(filename, instance.user.id,
+                             time.strftime('%m-%d-%Y&%H.%M.%S') )
+
+class DrawingAttachment(models.Model):
+    upload = models.FileField(upload_to=drawing_upload_path,
+                              blank=True) # default='settings.BASE_DIR/pdfs/file.pdf')
+    drawing = models.ForeignKey(Drawing, on_delete=models.SET_NULL,
+                                blank=True, null=True)
+
+
 
 
 class Revision(models.Model):

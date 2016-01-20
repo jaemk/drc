@@ -3,19 +3,10 @@
 {% block content %}
 
     <h3> DRC Drawing Search Results </h3>
-    <br/>
     <a href="{% url 'tracking:drawing_search' %}">Return to Drawing Search</a>
+    
     <br/>
     <br/>
-
-    {% if drawings %}
-    <ul>
-        {% for drawing in drawings %}
-        <li><a href="{% url 'tracking:drawing_detail' drawing.name %}">{{drawing.name.upper}}</a></li>
-        {% endfor %}
-    </ul>
-    {% else %}
-    <p>No drawings found...</p>
-    {% endif %}
+    {% include 'tracking/results_list.html' with items=drawings %}
 
 {% endblock %}

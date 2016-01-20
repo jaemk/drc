@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.shortcuts import get_object_or_404 as get_or_404
 
 from django.http import HttpResponse as httpresp
 from django.http import HttpResponseRedirect as httprespred
@@ -41,13 +42,13 @@ def index(request):
 
 
 
+### Drawing Search ###
 def _pull_drawings(formdat):
     if not formdat['drawing_name']:
         return None
     qstr = '^{}$'.format(formdat['drawing_name'].replace('*','.*'))
     dquery = Drawing.objects.filter(name__regex=qstr)
     return dquery
-
 
 @login_required(login_url='/accounts/login')
 def drawing_search(request):
@@ -57,11 +58,7 @@ def drawing_search(request):
         form = SearchForm(request.POST)
         if form.is_valid():
             drawings = _pull_drawings(form.cleaned_data)
-            # full_name = _add_student(username, form.cleaned_data)
-            # student = Student.objects.get(full_name=full_name)
 
-        # return httprespred('/tracking/search/results{}'.format())
-        # return httprespred('/tracking/')
     else:
         form = SearchForm()
 
@@ -75,16 +72,29 @@ def drawing_search(request):
 @login_required(login_url='/accounts/login')
 def drawing_detail(request, drawing_name):
     info = Drawing.objects.get(name=drawing_name.lower())
-    return httpresp('detail for {}<br/><br/>{}'\
-                    .format(drawing_name, 
-                            [info.desc,
-                                       info.phase,
-                                       info.block.name,
-                                       info.status.status,
-                                       info.department.name,
-                                       info.discipline.name,
-                                       info.kind.name,
-                                       info.expected]))
+    attch = info.get_attachments()
+    drawing = {'name':drawing_name, 'desc':info.desc, 'phase':info.phase,
+               'received':info.received, 'status':info.status.status,
+               'expected':info.expected, 'dep':info.department.name,
+               'disc':info.discipline.name, 'kind':info.kind.name,
+               'attachments':attch if attch else 'None'}
+    context = {'drawing':drawing}
+    return render(request, 'tracking/drawing_detail.html', context)
+    # return httpresp('detail for {}<br/><br/>{}'\
+    #                 .format(drawing_name, 
+    #                         [info.desc,
+    #                                    info.phase,
+    #                                    info.block.name,
+    #                                    info.status.status,
+    #                                    info.department.name,
+    #                                    info.discipline.name,
+    #                                    info.kind.name,
+    #                                    info.expected]))
+
+
+@login_required(login_url='/accounts/login')
+def attachment(request, file_name):
+    pass
 
 # def detail_pdf(request, question_id):
 #     try:

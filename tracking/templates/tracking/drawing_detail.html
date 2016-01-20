@@ -1,0 +1,46 @@
+{% extends 'tracking/base.html' %}
+
+{% block content %}
+
+<h3> {{ drawing.name.upper }} </h3>
+<a href="javascript:history.go(-1);">Return to results</a>
+<br/>
+<br/>
+
+<table border="1">
+    <col width=120>
+    <col width=>
+    <caption><strong> -- Drawing Info -- </strong></caption>
+    <tr><th> Name        </th>  <td> {{ drawing.name.upper }} </td></tr>
+    <tr><th> Description </th>  <td> {{ drawing.desc.title }} </td></tr>
+    <tr><th> Phase       </th>  <td> {{ drawing.phase }} </td></tr>
+    <tr><th> Received    </th>  <td> {{ drawing.received }} </td></tr>
+    
+    {% if drawing.received %}
+    <tr><th> Status      </th>  <td> {{ drawing.status }} </td></tr>
+    
+    {% else %}
+    <tr><th> Expected    </th>  <td> {{drawing.expected.month}}-{{drawing.expected.day}}-{{drawing.expected.year}} </td></tr>
+    {% endif %}
+    
+    <tr><th> Department  </th>  <td> {{ drawing.dep }} </td></tr>
+    <tr><th> Discipline  </th>  <td> {{ drawing.disc.title }} </td></tr>
+    <tr><th> Type        </th>  <td> {{ drawing.kind.title }} </td></tr>
+    
+    <!-- {% if drawing.attachments %} -->
+    <!-- {% endif %} -->
+    <tr><th> Attachments </th>  <td> {{drawing.attachments}} </td></tr>
+
+    
+</table>
+
+<!-- <br/>
+
+    <h4> Comments </h4>
+    <a href="{% url 'tracking:drawing_search' %}">Return to Drawing Search</a>
+    
+    <br/>
+    <br/>
+    {% include 'tracking/results_list.html' with items=drawings %} -->
+
+{% endblock %}
