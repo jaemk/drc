@@ -83,9 +83,14 @@ class Drawing(models.Model):
     def __str__(self):
         return 'Drawing: {}'.format(self.name.upper())
 
-    def get_attachments(self):
+    def get_attachment_names(self):
         att = DrawingAttachment.objects.filter(drawing__id=self.id)
-        return att
+        # print(att.__dict__)
+        # print(att[0].upload.__dict__)
+        # print(att[0].upload.name)
+        attch = [item.upload.name.split('/')[-1] for item in att]
+        print(attch)
+        return attch
 
     def newest_rev(self):
         ''' Return most recent revision object '''
@@ -99,14 +104,21 @@ class Drawing(models.Model):
 def drawing_upload_path(instance, filename):
     # upload to MEDIA_ROOT/<filename>_<userid>_<date>
     time = timezone.now()
-    return 'drawing/{}_{}_{}'.format(filename, instance.user.id,
-                             time.strftime('%m-%d-%Y&%H.%M.%S') )
+    print(instance)
+    return 'drawing/{}_{}'.format(time.strftime('%m-%d-%Y_%H.%M.%S'),
+                                  filename,
+                                   )
 
 class DrawingAttachment(models.Model):
     upload = models.FileField(upload_to=drawing_upload_path,
                               blank=True) # default='settings.BASE_DIR/pdfs/file.pdf')
     drawing = models.ForeignKey(Drawing, on_delete=models.SET_NULL,
                                 blank=True, null=True)
+    mod_by = models.ForeignKey(User, on_delete=models.SET_NULL,
+                                blank=True, null=True)
+
+    def __repr__(self):
+        return '<Attachment: {}>'.format(self.upload)
 
 
 

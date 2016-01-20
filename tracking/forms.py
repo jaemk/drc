@@ -17,3 +17,8 @@ class SearchForm(forms.Form):
     block_name = forms.CharField(max_length=150, required=False)
     department_name = forms.CharField(max_length=150, required=False)
 
+
+class FileForm(forms.Form):
+    newfile = forms.FileField(label='Select a file',
+                              help_text='pdfs prefered')
+

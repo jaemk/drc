@@ -15,9 +15,12 @@ Including another URLconf
     3. Add a URL to urlpatterns:  url(r'^blog/', include(blog_urls))
 """
 from django.conf.urls import url
-from django.contrib import admin
+from django.conf.urls import patterns
 from django.conf.urls import include
+from django.contrib import admin
 from django.contrib.auth import views as auth_views
+from django.conf import settings
+from django.conf.urls.static import static
 
 from tracking import urls as tracking_urls
 from tracking import views as tracking_views
@@ -28,4 +31,6 @@ urlpatterns = [
     url(r'^accounts/logout', tracking_views.logout_view, name='logout'),
     url(r'^', include(tracking_urls)),
     url(r'^tracking/', include(tracking_urls)),
-]
+    
+] + (static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT))
+

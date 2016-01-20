@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404 as get_or_404
 
 from django.http import HttpResponse as httpresp
 from django.http import HttpResponseRedirect as httprespred
+from django.core.urlresolvers import reverse
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
@@ -11,11 +12,13 @@ from .models import Block
 from .models import DrawingStatus
 from .models import Department
 from .models import Drawing
+from .models import DrawingAttachment
 from .models import Revision
 from .models import Comment
 from .models import Reply
 
 from .forms import SearchForm
+from .forms import FileForm
 
 def _get_username(request):
     if request.user.is_authenticated():
@@ -71,29 +74,53 @@ def drawing_search(request):
 
 @login_required(login_url='/accounts/login')
 def drawing_detail(request, drawing_name):
+    username = _get_username(request)
     info = Drawing.objects.get(name=drawing_name.lower())
-    attch = info.get_attachments()
+    attch = info.get_attachment_names()
     drawing = {'name':drawing_name, 'desc':info.desc, 'phase':info.phase,
                'received':info.received, 'status':info.status.status,
                'expected':info.expected, 'dep':info.department.name,
                'disc':info.discipline.name, 'kind':info.kind.name,
-               'attachments':attch if attch else 'None'}
-    context = {'drawing':drawing}
+               'attachments':attch}
+
+    context = {'username':username, 'drawing':drawing}
     return render(request, 'tracking/drawing_detail.html', context)
-    # return httpresp('detail for {}<br/><br/>{}'\
-    #                 .format(drawing_name, 
-    #                         [info.desc,
-    #                                    info.phase,
-    #                                    info.block.name,
-    #                                    info.status.status,
-    #                                    info.department.name,
-    #                                    info.discipline.name,
-    #                                    info.kind.name,
-    #                                    info.expected]))
 
 
 @login_required(login_url='/accounts/login')
-def attachment(request, file_name):
+def drawing_edit(request, drawing_name):
+    username = _get_username(request)
+    errors = None
+    if request.method == 'POST':
+        #drawing_form = DrawingForm() # initialize with current info
+        file_form = FileForm(request.POST, request.FILES)
+        print(request.FILES['newfile'].__dict__)
+        if file_form.is_valid():
+            if request.FILES['newfile']._size > 10 * 1024 * 1024:
+                # size > 10mb
+                error = 'File too large. Please keey it under 10mb'
+            else:
+                drawing = Drawing.objects.get(name=drawing_name.lower())
+                newfile = DrawingAttachment(upload=request.FILES['newfile'],
+                                            drawing=drawing,
+                                            mod_by=username)
+                newfile.save()
+
+                return httprespred(reverse('tracking:drawing_detail', args=[drawing_name]))
+    else:
+        file_form = FileForm()
+
+    info = Drawing.objects.get(name=drawing_name.lower())
+    drawing = {'name':info.name}
+    context = {'drawing':drawing, 'form':file_form, 'errors':errors}
+    return render(request, 'tracking/drawing_add.html', context)
+
+
+
+@login_required(login_url='/accounts/login')
+def attachment(request, drawing_name, file_name):
+    # filepath = DrawingAttachment()
+    return httpresp('reponse for {} - {}'.format(drawing_name, file_name))
     pass
 
 # def detail_pdf(request, question_id):

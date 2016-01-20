@@ -10,7 +10,7 @@
 <table border="1">
     <col width=120>
     <col width=>
-    <caption><strong> -- Drawing Info -- </strong></caption>
+    <caption><strong> -- Drawing Info <a href="{% url 'tracking:drawing_edit' drawing.name %}"> edit </a>-- </strong></caption>
     <tr><th> Name        </th>  <td> {{ drawing.name.upper }} </td></tr>
     <tr><th> Description </th>  <td> {{ drawing.desc.title }} </td></tr>
     <tr><th> Phase       </th>  <td> {{ drawing.phase }} </td></tr>
@@ -29,9 +29,20 @@
     
     <!-- {% if drawing.attachments %} -->
     <!-- {% endif %} -->
-    <tr><th> Attachments </th>  <td> {{drawing.attachments}} </td></tr>
+    <tr><th> Attachments </th>  <td> 
+    {% if drawing.attachments %}
+    <ul>
+        {% for attch in drawing.attachments %}
+        <li><a href="{% url 'tracking:attachment' drawing_name=drawing.name file_name=attch %}">{{attch}}</a></li>
+        {% endfor %}
+    </ul>
 
-    
+    {% else %}
+    None
+
+    {% endif %}
+    </td></tr>
+
 </table>
 
 <!-- <br/>
