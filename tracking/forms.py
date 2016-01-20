@@ -2,7 +2,6 @@ from django import forms
 import datetime
 
 
-
 class SearchForm(forms.Form):
     drawing_name  = forms.CharField(max_length=250, required=True)
     revision_number = forms.CharField(max_length=100, required=False)

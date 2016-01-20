@@ -54,7 +54,6 @@ class DrawingKind(models.Model):
         return 'DwgKind: {}'.format(self.name.title())
 
 
-
 class Drawing(models.Model):
     name = models.CharField(max_length=250)
     desc = models.CharField(max_length=500, blank=True, null=True)
@@ -83,14 +82,11 @@ class Drawing(models.Model):
     def __str__(self):
         return 'Drawing: {}'.format(self.name.upper())
 
-    def get_attachment_names(self):
+    def get_attachment_names_ids(self):
         att = DrawingAttachment.objects.filter(drawing__id=self.id)
-        # print(att.__dict__)
-        # print(att[0].upload.__dict__)
-        # print(att[0].upload.name)
-        attch = [item.upload.name.split('/')[-1] for item in att]
-        print(attch)
-        return attch
+        attch_names = [item.upload.name.split('/')[-1] for item in att]
+        attch_ids = [item.id for item in att]
+        return attch_names, attch_ids
 
     def newest_rev(self):
         ''' Return most recent revision object '''
@@ -102,12 +98,11 @@ class Drawing(models.Model):
 
 
 def drawing_upload_path(instance, filename):
-    # upload to MEDIA_ROOT/<filename>_<userid>_<date>
-    time = timezone.now()
-    print(instance)
-    return 'drawing/{}_{}'.format(time.strftime('%m-%d-%Y_%H.%M.%S'),
-                                  filename,
-                                   )
+    # upload to MEDIA_ROOT/drawing/<filename>
+    # time = timezone.now()
+    # time.strftime('%m-%d-%Y_%H.%M.%S')
+    # print(instance)
+    return 'drawing/{}'.format(filename)
 
 class DrawingAttachment(models.Model):
     upload = models.FileField(upload_to=drawing_upload_path,
@@ -116,11 +111,19 @@ class DrawingAttachment(models.Model):
                                 blank=True, null=True)
     mod_by = models.ForeignKey(User, on_delete=models.SET_NULL,
                                 blank=True, null=True)
+    add_date = models.DateTimeField(auto_now=True)
+    mod_date = models.DateTimeField(auto_now=True, null=True)
+
+    def filename(self, filepath=None):
+        if not filepath:
+            filepath = self.upload.name
+        return filepath.split('/')[-1]
 
     def __repr__(self):
         return '<Attachment: {}>'.format(self.upload)
 
-
+    def __str__(self):
+        return 'Att: {}'.format(self.filename())
 
 
 class Revision(models.Model):

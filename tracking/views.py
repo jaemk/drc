@@ -1,3 +1,5 @@
+import os
+
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404 as get_or_404
 
@@ -7,6 +9,8 @@ from django.core.urlresolvers import reverse
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
+
+from django.conf import settings
 
 from .models import Block
 from .models import DrawingStatus
@@ -20,7 +24,9 @@ from .models import Reply
 from .forms import SearchForm
 from .forms import FileForm
 
+
 def _get_username(request):
+    ''' Helper to return user from a request '''
     if request.user.is_authenticated():
         username = request.user
     else:
@@ -41,8 +47,6 @@ def logout_view(request):
 def index(request):
     username = _get_username(request)
     return render(request, 'tracking/index.html', {'username':username})
-    # return httpresp('Welcome to DRC tracking index')
-
 
 
 ### Drawing Search ###
@@ -76,7 +80,8 @@ def drawing_search(request):
 def drawing_detail(request, drawing_name):
     username = _get_username(request)
     info = Drawing.objects.get(name=drawing_name.lower())
-    attch = info.get_attachment_names()
+    attch_names, attch_ids = info.get_attachment_names_ids()
+    attch = [{'name':attch_names[i], 'id':attch_ids[i]} for i in range(len(attch_names))]
     drawing = {'name':drawing_name, 'desc':info.desc, 'phase':info.phase,
                'received':info.received, 'status':info.status.status,
                'expected':info.expected, 'dep':info.department.name,
@@ -92,7 +97,7 @@ def drawing_edit(request, drawing_name):
     username = _get_username(request)
     errors = None
     if request.method == 'POST':
-        #drawing_form = DrawingForm() # initialize with current info
+        #drawing_form = DrawingForm() # want to initialize with current info and use drawing_form instead
         file_form = FileForm(request.POST, request.FILES)
         print(request.FILES['newfile'].__dict__)
         if file_form.is_valid():
@@ -105,7 +110,6 @@ def drawing_edit(request, drawing_name):
                                             drawing=drawing,
                                             mod_by=username)
                 newfile.save()
-
                 return httprespred(reverse('tracking:drawing_detail', args=[drawing_name]))
     else:
         file_form = FileForm()
@@ -116,26 +120,20 @@ def drawing_edit(request, drawing_name):
     return render(request, 'tracking/drawing_add.html', context)
 
 
-
 @login_required(login_url='/accounts/login')
-def attachment(request, drawing_name, file_name):
-    # filepath = DrawingAttachment()
-    return httpresp('reponse for {} - {}'.format(drawing_name, file_name))
-    pass
+def attachment(request, drawing_name, file_id):
+    try:
+        attachment = DrawingAttachment.objects.get(pk=file_id)
+        filepath = attachment.upload.name
+        filename = attachment.filename(filepath=filepath)
+        with open(os.path.join(settings.MEDIA_ROOT, filepath), 'rb') as attch:
+            response = httpresp(attch.read(), content_type='application/pdf')
+            response['Content-Disposition'] = 'filename={}'.format(filename)
+            return response
 
-# def detail_pdf(request, question_id):
-#     try:
-#         #question = Question.objects.all().exclude(pdf__endswith='file.pdf')
-#         question = Question.objects.get(pk=question_id)
-#         if question.pdf != '':
-#             filepath = question.pdf
-#         else:
-#             raise http404('No drawing for question: {}'.format(question.question_text))
-#     except Question.DoesNotExist:
-#         raise http404('Question does not exist')
-
-#     with open(str(filepath), 'rb') as pdffile:
-#         response = httpresp(pdffile.read(), content_type='application/pdf')
-#         response['Content-Disposition'] = 'filename=file.pdf'
-#         return response
-#     #return httpresp(file.read()
+    except Exception as ex:
+        return httpresp('''Error: {} <br/>
+                        Unable to serve drawing: {}, file_id: {}
+                        </br>Please notify James Kominick
+                        </br><a href="javascript:history.go(-1);">Return to prev</a>'''\
+                        .format(ex, drawing_name, file_id))

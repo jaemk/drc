@@ -27,13 +27,11 @@
     <tr><th> Discipline  </th>  <td> {{ drawing.disc.title }} </td></tr>
     <tr><th> Type        </th>  <td> {{ drawing.kind.title }} </td></tr>
     
-    <!-- {% if drawing.attachments %} -->
-    <!-- {% endif %} -->
     <tr><th> Attachments </th>  <td> 
     {% if drawing.attachments %}
     <ul>
         {% for attch in drawing.attachments %}
-        <li><a href="{% url 'tracking:attachment' drawing_name=drawing.name file_name=attch %}">{{attch}}</a></li>
+        <li><a href="{% url 'tracking:attachment' drawing_name=drawing.name file_id=attch.id %}">{{attch.name}}</a></li>
         {% endfor %}
     </ul>
 
