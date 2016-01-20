@@ -37,6 +37,7 @@ def _get_username(request):
 
 
 def logout_view(request):
+    ''' Logout confirmation '''
     username = request.user
     logout(request)
     return httpresp('''Goodbye {} !<br>
@@ -44,22 +45,29 @@ def logout_view(request):
                     <a href="/">return to homepage</a>'''.format(username))
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def index(request):
+    ''' Homepage '''
     username = _get_username(request)
     return render(request, 'tracking/index.html', {'username':username})
 
 
 ### Drawing Search ###
 def _pull_drawings(formdat):
+    ''' Replace wildcards '*' with regex '.*'
+        filter drawing names with optional qualifiers '''
     if not formdat['drawing_name']:
         return None
+    # apply other qualifiers
+    # start with simplest first, saving refex
+    # search for last - return as soon as null
     qstr = '^{}$'.format(formdat['drawing_name'].replace('*','.*'))
     dquery = Drawing.objects.filter(name__regex=qstr)
     return dquery
 
-@login_required(login_url='/accounts/login')
+@login_required
 def drawing_search(request):
+    ''' Serve up drawing search form with optional qualifiers '''
     username = _get_username(request)
     drawings = False
     if request.method == 'POST':
@@ -77,8 +85,10 @@ def drawing_search(request):
     return render(request, 'tracking/drawing_search.html', context)
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def drawing_detail(request, drawing_name):
+    ''' Fetch drawing details, and linked attachments, 
+        revisions, comments, and replies'''
     username = _get_username(request)
     info = Drawing.objects.get(name=drawing_name.lower())
     attch_names, attch_ids = info.get_attachment_names_ids()
@@ -93,8 +103,9 @@ def drawing_detail(request, drawing_name):
     return render(request, 'tracking/drawing_detail.html', context)
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def drawing_edit(request, drawing_name):
+    ''' Serve form to edit drawing info or add attachments '''
     username = _get_username(request)
     errors = None
     if request.method == 'POST':
@@ -121,8 +132,9 @@ def drawing_edit(request, drawing_name):
     return render(request, 'tracking/drawing_add.html', context)
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def attachment(request, drawing_name, file_id):
+    ''' Serve attachment for viewing or download '''
     try:
         attachment = DrawingAttachment.objects.get(pk=file_id)
         filepath = attachment.upload.name
