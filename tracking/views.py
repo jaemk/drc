@@ -1,4 +1,5 @@
 import os
+import mimetypes
 
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404 as get_or_404
@@ -126,8 +127,9 @@ def attachment(request, drawing_name, file_id):
         attachment = DrawingAttachment.objects.get(pk=file_id)
         filepath = attachment.upload.name
         filename = attachment.filename(filepath=filepath)
-        with open(os.path.join(settings.MEDIA_ROOT, filepath), 'rb') as attch:
-            response = httpresp(attch.read(), content_type='application/pdf')
+        full_path = os.path.join(settings.MEDIA_ROOT, filepath)
+        with open(full_path, 'rb') as attch:
+            response = httpresp(attch.read(), content_type=mimetypes.guess_type(full_path)[0])
             response['Content-Disposition'] = 'filename={}'.format(filename)
             return response
 
