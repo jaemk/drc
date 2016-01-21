@@ -101,7 +101,11 @@ def drawing_upload_path(instance, filename):
     # upload to MEDIA_ROOT/drawing/<filename>
     # time = timezone.now()
     # time.strftime('%m-%d-%Y_%H.%M.%S')
-    # print(instance)
+    # print(instance.__dict__)
+    getattr(instance, 'drawing_id', None)
+    getattr(instance, 'revision_id', None)
+    getattr(instance, 'comment_id', None)
+    print(instance.drawing_id)
     return 'drawing/{}'.format(filename)
 
 class DrawingAttachment(models.Model):

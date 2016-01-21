@@ -31,7 +31,7 @@
     {% if drawing.attachments %}
     <ul>
         {% for attch in drawing.attachments %}
-        <li><a href="{% url 'tracking:attachment' drawing_name=drawing.name file_id=attch.id %}">{{attch.name}}</a></li>
+        <li><a href="{% url 'tracking:serve_attachment' drawing_name=drawing.name file_id=attch.id %}">{{attch.name}}</a></li>
         {% endfor %}
     </ul>
 

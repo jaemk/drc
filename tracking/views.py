@@ -61,9 +61,40 @@ def _pull_drawings(formdat):
     # apply other qualifiers
     # start with simplest first, saving refex
     # search for last - return as soon as null
+    cquery = None
+    print(formdat['comment_status'])
+    if formdat['comment_status']:
+        com_stat = formdat['comment_status']
+        if len(com_stat) > 1:
+            cquery = Comment.objects.prefetch_related('revision__drawing')\
+                                    .all()
+        else:
+            check = {'True':True, 'False':False}
+            cquery = Comment.objects.prefetch_related('revision__drawing')\
+                                    .filter(status=check[com_stat[0]])
+        if not cquery.exists():
+            return
+
+    if cquery:
+        dkeys = [c.revision.drawing.id for c in cquery]
+        dquery = Drawing.objects.filter(pk__in=dkeys)
+    else:
+        dquery = Drawing.objects
+
+    if formdat['department_name']:
+        dquery = dquery.filter(department__name=formdat['department_name'])
+
+    if formdat['block_name']:
+        dquery = dquery.filter(block__name=formdat['block_name'])
+
+    if formdat['drawing_status']:
+        dquery = dquery.filter(status__status=formdat['drawing_status'])
+
+
     qstr = '^{}$'.format(formdat['drawing_name'].replace('*','.*'))
-    dquery = Drawing.objects.filter(name__regex=qstr)
+    dquery = dquery.filter(name__regex=qstr)
     return dquery
+
 
 @login_required
 def drawing_search(request):
@@ -133,7 +164,21 @@ def drawing_edit(request, drawing_name):
 
 
 @login_required
-def attachment(request, drawing_name, file_id):
+def revision_search(request):
+    # add rev search form
+    pass
+
+@login_required
+def revision_detail(request, drawing_name, rev_no):
+    pass
+
+@login_required
+def attachment_edit(request, drc_type, identifier):
+    # move the drawing_edit functionality here 
+    pass
+
+@login_required
+def serve_attachment(request, drawing_name=None, file_id=None):
     ''' Serve attachment for viewing or download '''
     try:
         attachment = DrawingAttachment.objects.get(pk=file_id)
