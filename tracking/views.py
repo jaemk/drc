@@ -133,12 +133,16 @@ def drawing_detail(request, drawing_name):
                'dep':dwg.department.name,  'disc':dwg.discipline.name,
                'kind':dwg.kind.name,       'attachments':dwg_attch}
 
-    # revs = Revision.objects.filter(drawing=)
-    # comment = Comment.objects.
+    revs = Revision.objects.filter(drawing=dwg)
+    revisions = [{'id':rev.id,         'number':rev.number,
+                  'date':rev.add_date, 'desc':rev.desc} for rev in revs]
 
+    coms = Comment.objects.filter(revision__in=revs)
+    comments = [{'id':com.id,         'status':com.status,
+                 'date':com.add_date, 'owner':com.owner} for com in coms]
 
-
-    context = {'username':username, 'drawing':drawing}
+    context = {'username':username, 'drawing':drawing,
+               'revisions':revs,    'comments':comments}
     return render(request, 'tracking/drawing_detail.html', context)
 
 
@@ -178,7 +182,21 @@ def revision_search(request):
 
 @login_required
 def revision_detail(request, drawing_name, rev_no):
-    pass
+    return httpresp('Revision detail for rev: {} on drawing: {}'\
+                    .format(rev_no, drawing_name))
+
+@login_required
+def comment_detail(request, com_id):
+    com = Comment.objects.prefetch_related('revision')\
+                         .filter(pk=com_id)
+    revs = Revision.objects.prefetch_related('drawing')\
+                .filter(pk__in=com.values_list('revision', flat=True))
+    dwgs = Drawing.objects.filter(pk__in=revs.values_list('drawing', flat=True))
+    return httpresp('''Comment detail id: {}<br/>
+                       made on revs: {}<br/>
+                       rev-dwgs: {}'''.format(com_id, 
+                                              ', '.join([r.number for r in revs]),
+                                              ', '.join([d.name for d in dwgs])))
 
 @login_required
 def attachment_edit(request, drc_type, identifier):
@@ -204,3 +222,25 @@ def serve_attachment(request, drawing_name=None, file_id=None):
                         </br>Please notify James Kominick
                         </br><a href="javascript:history.go(-1);">Return to prev</a>'''\
                         .format(ex, drawing_name, file_id))
+
+
+@login_required
+def open_comment_search(request):
+    com = Comment.objects.prefetch_related('revision')\
+                         .filter(status=True)
+    if not com:
+        context = {'no_comments':'No open comments'}
+        return httpresp('no open comments')
+    # query sets are being evaluated
+    # revs = Revision.objects.filter(pk__in=com[:1].values_list('revision',
+    #                                                        flat=True))
+    # comments = [{'id':com[0].id, 'desc':com[0].desc, 'text':com[0].text,
+    #              'status':com[0].status, 'owner':com[0].owner, 'revs':revs}]
+    # if com[1:]:
+    #     for i in range(len(com[1:])):
+    #         newcom = com[i+1:]
+    #         revs = Revision.objects.filter(pk__in=newcom[:1].values_list('revision',
+    #                                                        flat=True))
+    #         comments.append({'id':newcom[:1].id, 'desc':newcom[:1].desc, 'text':newcom[:1].text,
+    #              'status':newcom[:1].status, 'owner':newcom[:1].owner, 'revs':revs})
+    # return httpresp(comments)

@@ -45,16 +45,15 @@
 <hr size=2> -->
 
 <table class="info-table rev-table">
-    <col width="50">
+    <col width="100">
     <col width="120">
     <col width="300">
     <caption><strong> -- Revision Info #add# -- </strong></caption>
     <tr><th> No. </th><th> Date </th><th> Description </th> </tr>
     {% if revisions %}
         {% for rev in revisions %}
-        <tr><td><a href="/"> A{{ revision.number }} </a></td><td>01-16-2016{{ revision.date }}</td><td>asdkalkf lskflk jdljfsldj{{ revision.desc }}</td></tr>
+        <tr><td><a href="{% url 'tracking:revision_detail' drawing_name=drawing.name rev_no=rev.number %}">{{ rev.number }} </a></td><td>{{rev.date.month}}-{{rev.date.day}}-{{rev.date.year}}</td><td>{{ rev.desc }}</td></tr>
         {% endfor %}
-
     {% else %}
     <tr><td colspan="3" style="text-align:center"><strong> No Revisions </strong></td></tr>
     {% endif %}
@@ -64,7 +63,7 @@
 </br>
 <div style="clear:both;"></div>
 
-<table class="info-table">
+<table class="info-table rev-table">
 <col width="50">
 <col width="75">
 <col width="120">
@@ -73,7 +72,7 @@
 <tr><th> ID </th><th> Status </th><th> Date </th><th> Owner </th></tr>
 {% if comments %}
     {% for com in comments %}
-    <tr><td><a href="/"> id{{ com.id }} </a></td><td> stat </td><td> date </td><td> user </td></tr>
+    <tr><td><a href="{% url 'tracking:comment_detail' com_id=com.id %}">{{ com.id }} </a></td><td>{{ com.status }}</td><td>{{com.date.month}}-{{com.date.day}}-{{com.date.year}}</td><td>{{ com.owner }}</td></tr>
     {% endfor %}
 
 {% else %}
