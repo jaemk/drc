@@ -66,26 +66,29 @@ def _pull_drawings(formdat):
     if formdat['comment_status']:
         com_stat = formdat['comment_status']
         if len(com_stat) > 1:
-            cquery = Comment.objects.prefetch_related('revision__drawing')\
-                                    .all()
+            cquery = Comment.objects.prefetch_related('revision').all()
         else:
-            check = {'True':True, 'False':False}
-            cquery = Comment.objects.prefetch_related('revision__drawing')\
+            check = {'open':True, 'closed':False}
+            cquery = Comment.objects.prefetch_related('revision')\
                                     .filter(status=check[com_stat[0]])
         if not cquery.exists():
             return
 
     if cquery:
-        dkeys = [c.revision.drawing.id for c in cquery]
-        dquery = Drawing.objects.filter(pk__in=dkeys)
+        revs = Revision.objects.prefetch_related('drawing')\
+                        .filter(pk__in=cquery.values_list('revision', flat=True))
+        dquery = Drawing.objects.filter(pk__in=revs.values_list('drawing', flat=True))
+
     else:
         dquery = Drawing.objects
 
     if formdat['department_name']:
-        dquery = dquery.filter(department__name=formdat['department_name'])
+        exp = formdat['department_name'].strip().lower().replace('*','.*')
+        dquery = dquery.filter(department__name__regex=exp)
 
     if formdat['block_name']:
-        dquery = dquery.filter(block__name=formdat['block_name'])
+        exp = formdat['block_name'].strip().lower().replace('*','.*')
+        dquery = dquery.filter(block__name__regex=exp)
 
     if formdat['drawing_status']:
         dquery = dquery.filter(status__status=formdat['drawing_status'])
@@ -121,14 +124,19 @@ def drawing_detail(request, drawing_name):
     ''' Fetch drawing details, and linked attachments, 
         revisions, comments, and replies'''
     username = _get_username(request)
-    info = Drawing.objects.get(name=drawing_name.lower())
-    attch_names, attch_ids = info.get_attachment_names_ids()
-    attch = [{'name':attch_names[i], 'id':attch_ids[i]} for i in range(len(attch_names))]
-    drawing = {'name':drawing_name, 'desc':info.desc, 'phase':info.phase,
-               'received':info.received, 'status':info.status.status,
-               'expected':info.expected, 'dep':info.department.name,
-               'disc':info.discipline.name, 'kind':info.kind.name,
-               'attachments':attch}
+    dwg = Drawing.objects.get(name=drawing_name.lower())
+    attch_names, attch_ids = dwg.get_attachment_names_ids()
+    dwg_attch = [{'name':attch_names[i], 'id':attch_ids[i]} for i in range(len(attch_names))]
+    drawing = {'name':drawing_name,             'desc':dwg.desc,
+               'phase':dwg.phase,          'received':dwg.received,
+               'status':dwg.status.status, 'expected':dwg.expected,
+               'dep':dwg.department.name,  'disc':dwg.discipline.name,
+               'kind':dwg.kind.name,       'attachments':dwg_attch}
+
+    # revs = Revision.objects.filter(drawing=)
+    # comment = Comment.objects.
+
+
 
     context = {'username':username, 'drawing':drawing}
     return render(request, 'tracking/drawing_detail.html', context)

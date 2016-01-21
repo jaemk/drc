@@ -7,8 +7,8 @@ class SearchForm(forms.Form):
     revision_number = forms.CharField(max_length=100, required=False)
     comment_status = forms.MultipleChoiceField(required=False,
                                        widget=forms.CheckboxSelectMultiple,
-                                       choices=((True, 'Open'),
-                                                (False, 'Closed')))
+                                       choices=(('open', 'Open'),
+                                                ('closed', 'Closed')))
     drawing_status = forms.MultipleChoiceField(required=False,
                                        widget=forms.CheckboxSelectMultiple,
                                        choices=(('review', 'New/Review'),

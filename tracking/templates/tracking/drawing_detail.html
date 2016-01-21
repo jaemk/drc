@@ -5,11 +5,10 @@
 <h3> {{ drawing.name.upper }} </h3>
 <a href="javascript:history.go(-1);">Return to results</a>
 <br/>
-<br/>
 
-<table border="1">
+<table class="info-table">
     <col width=120>
-    <col width=>
+    <col width=300>
     <caption><strong> -- Drawing Info <a href="{% url 'tracking:drawing_edit' drawing.name %}"> edit </a>-- </strong></caption>
     <tr><th> Name        </th>  <td> {{ drawing.name.upper }} </td></tr>
     <tr><th> Description </th>  <td> {{ drawing.desc.title }} </td></tr>
@@ -40,7 +39,47 @@
 
     {% endif %}
     </td></tr>
+</table>
 
+<!-- <br/>
+<hr size=2> -->
+
+<table class="info-table rev-table">
+    <col width="50">
+    <col width="120">
+    <col width="300">
+    <caption><strong> -- Revision Info #add# -- </strong></caption>
+    <tr><th> No. </th><th> Date </th><th> Description </th> </tr>
+    {% if revisions %}
+        {% for rev in revisions %}
+        <tr><td><a href="/"> A{{ revision.number }} </a></td><td>01-16-2016{{ revision.date }}</td><td>asdkalkf lskflk jdljfsldj{{ revision.desc }}</td></tr>
+        {% endfor %}
+
+    {% else %}
+    <tr><td colspan="3" style="text-align:center"><strong> No Revisions </strong></td></tr>
+    {% endif %}
+
+</table>
+
+</br>
+<div style="clear:both;"></div>
+
+<table class="info-table">
+<col width="50">
+<col width="75">
+<col width="120">
+<col width="200">
+<caption><strong> -- Comments #add# -- </strong></caption>
+<tr><th> ID </th><th> Status </th><th> Date </th><th> Owner </th></tr>
+{% if comments %}
+    {% for com in comments %}
+    <tr><td><a href="/"> id{{ com.id }} </a></td><td> stat </td><td> date </td><td> user </td></tr>
+    {% endfor %}
+
+{% else %}
+<tr><td colspan="4" style="text-align:center"><strong> No Comments </strong></td></tr>
+
+{% endif %}
 </table>
 
 <!-- <br/>

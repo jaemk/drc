@@ -14,15 +14,15 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        # migrations.AddField(
-        #     model_name='drawingattachment',
-        #     name='add_date',
-        #     field=models.DateTimeField(auto_now=True, default=datetime.datetime(2016, 1, 20, 21, 2, 38, 780105, tzinfo=utc)),
-        #     preserve_default=False,
-        # ),
-        # migrations.AddField(
-        #     model_name='drawingattachment',
-        #     name='mod_date',
-        #     field=models.DateTimeField(auto_now=True, null=True),
-        # ),
+        migrations.AddField(
+            model_name='drawingattachment',
+            name='add_date',
+            field=models.DateTimeField(auto_now=True, default=datetime.datetime(2016, 1, 20, 21, 2, 38, 780105, tzinfo=utc)),
+            preserve_default=False,
+        ),
+        migrations.AddField(
+            model_name='drawingattachment',
+            name='mod_date',
+            field=models.DateTimeField(auto_now=True, null=True),
+        ),
     ]

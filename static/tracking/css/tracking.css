@@ -1,20 +1,31 @@
-h1 a{
-    margin-left:10px;
-    color: #FCA205;
+.header {
+
+    height: 95px;
+    background: #d3ac5f;
+
 }
 
-table.center-table, th {
-    margin-left:10px;
+table, th, td {
+        border: 1px solid black;
+    th {
+        text-align: center;
+    }
+}
+
+.info-table {
+    float: left;
+    margin-top: 20; 
+    margin-left: 10px;
+    margin-right: 30px;
+    text-align: left;
+    padding: 10px;
+}
+.info-table th {
     text-align: center;
 }
 
-table.purchase-table, th {
-    margin-left:30px;
-    text-align:center;
-}
-
-table.border-spaced {
-    border-spacing:10px;
+.rev-table {
+    text-align: center;
 }
 
 
