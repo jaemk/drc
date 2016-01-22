@@ -9,14 +9,12 @@
 
 <form action="{% url 'tracking:drawing_edit' drawing.name %}" method="Post" enctype="multipart/form-data">
     {% csrf_token %}
-    <p>{{ form.non_field_errors }}</p>
-    <p>{{ form.newfile.label_tag }} {{ form.newfile.help_text }}</p>
     <p>
-        {{ form.newfile.errors }}
-        {{ form.newfile }}
+        <table class="search-table">
         {{ form.as_table }}
+        </table>
     </p>
-    <p><input type="submit" value="Upload"/></p>
+    <p><input type="submit" value="Submit Changes"/></p>
 </form>
 
 

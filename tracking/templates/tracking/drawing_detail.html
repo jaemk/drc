@@ -12,19 +12,20 @@
     <caption><strong> -- Drawing Info <a href="{% url 'tracking:drawing_edit' drawing.name %}"> edit </a>-- </strong></caption>
     <tr><th> Name        </th>  <td> {{ drawing.name.upper }} </td></tr>
     <tr><th> Description </th>  <td> {{ drawing.desc.title }} </td></tr>
-    <tr><th> Phase       </th>  <td> {{ drawing.phase }} </td></tr>
+    <tr><th> Phase       </th>  <td> {{ drawing.phase.number }} </td></tr>
     <tr><th> Received    </th>  <td> {{ drawing.received }} </td></tr>
-    
+    <tr><th> Project     </th>  <td> {{ drawing.project.name }} </td></tr>
+    <tr><th> Block       </th>  <td> {{ drawing.block.name }} 
     {% if drawing.received %}
-    <tr><th> Status      </th>  <td> {{ drawing.status }} </td></tr>
+    <tr><th> Status      </th>  <td> {{ drawing.status.status }} </td></tr>
     
     {% else %}
     <tr><th> Expected    </th>  <td> {{drawing.expected.month}}-{{drawing.expected.day}}-{{drawing.expected.year}} </td></tr>
     {% endif %}
     
-    <tr><th> Department  </th>  <td> {{ drawing.dep }} </td></tr>
-    <tr><th> Discipline  </th>  <td> {{ drawing.disc.title }} </td></tr>
-    <tr><th> Type        </th>  <td> {{ drawing.kind.title }} </td></tr>
+    <tr><th> Department  </th>  <td> {{ drawing.department.name }} </td></tr>
+    <tr><th> Discipline  </th>  <td> {{ drawing.discipline.name.title }} </td></tr>
+    <tr><th> Type        </th>  <td> {{ drawing.kind.name.title }} </td></tr>
     
     <tr><th> Attachments </th>  <td> 
     {% if drawing.attachments %}

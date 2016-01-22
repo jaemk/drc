@@ -120,19 +120,15 @@ def drawing_search(request):
     return render(request, 'tracking/drawing_search.html', context)
 
 
-@login_required
-def drawing_detail(request, drawing_name):
-    ''' Fetch drawing details, and linked attachments, 
-        revisions, comments, and replies'''
-    username = _get_username(request)
+def _get_drawing_detail(drawing_name):
     dwg = Drawing.objects.get(name=drawing_name.lower())
     attch_names, attch_ids = dwg.get_attachment_names_ids()
     dwg_attch = [{'name':attch_names[i], 'id':attch_ids[i]} for i in range(len(attch_names))]
-    drawing = {'name':drawing_name,             'desc':dwg.desc,
-               'phase':dwg.phase,          'received':dwg.received,
-               'status':dwg.status.status, 'expected':dwg.expected,
-               'dep':dwg.department.name,  'disc':dwg.discipline.name,
-               'kind':dwg.kind.name,       'attachments':dwg_attch}
+    drawing = {'name':drawing_name, 'project':dwg.project, 'desc':dwg.desc,
+               'phase':dwg.phase, 'block':dwg.block, 'received':dwg.received,
+               'status':dwg.status, 'expected':dwg.expected,
+               'department':dwg.department,  'discipline':dwg.discipline,
+               'kind':dwg.kind,       'attachments':dwg_attch}
 
     revs = Revision.objects.filter(drawing=dwg)
     revisions = [{'id':rev.id,         'number':rev.number,
@@ -142,8 +138,17 @@ def drawing_detail(request, drawing_name):
     comments = [{'id':com.id,         'status':com.status,
                  'date':com.add_date, 'owner':com.owner} for com in coms]
 
-    context = {'username':username, 'drawing':drawing,
-               'revisions':revs,    'comments':comments}
+    context = {'drawing':drawing, 'revisions':revs, 'comments':comments}
+    return context
+
+
+@login_required
+def drawing_detail(request, drawing_name):
+    ''' Fetch drawing details, and linked attachments, 
+        revisions, comments, and replies'''
+    username = _get_username(request)
+    context = _get_drawing_detail(drawing_name)
+    context['username'] = username
     return render(request, 'tracking/drawing_detail.html', context)
 
 
@@ -154,26 +159,31 @@ def drawing_edit(request, drawing_name):
     errors = None
     if request.method == 'POST':
         #drawing_form = DrawingForm() # want to initialize with current info and use drawing_form instead
-        file_form = FileForm(request.POST, request.FILES)
-        print(request.FILES['newfile'].__dict__)
-        if file_form.is_valid():
-            if request.FILES['newfile']._size > 10 * 1024 * 1024:
-                # size > 10mb
-                error = 'File too large. Please keey it under 10mb'
-            else:
-                drawing = Drawing.objects.get(name=drawing_name.lower())
-                newfile = DrawingAttachment(upload=request.FILES['newfile'],
-                                            drawing=drawing,
-                                            mod_by=username)
-                newfile.save()
-                return httprespred(reverse('tracking:drawing_detail', args=[drawing_name]))
+        edit_form = DrawingAddForm(request.POST, request.FILES)
+        # print(request.FILES['newfile'].__dict__)
+        if edit_form.is_valid():
+            if 'newfille' in request.FILES:
+                if request.FILES['newfile']._size > 10 * 1024 * 1024:
+                    # size > 10mb
+                    error = 'File too large. Please keey it under 10mb'
+                else:
+                    drawing = Drawing.objects.get(name=drawing_name.lower())
+                    newfile = DrawingAttachment(upload=request.FILES['newfile'],
+                                                drawing=drawing,
+                                                mod_by=username)
+                    newfile.save()
+
+            return httprespred(reverse('tracking:drawing_detail', args=[drawing_name]))
     else:
-        file_form = DrawingAddForm()
+        detail = _get_drawing_detail(drawing_name)
+        drawing = detail['drawing']
+        current = {'name':drawing['name'], 'desc':drawing['desc']}
+        edit_form = DrawingAddForm(initial=current)
         # file_form = FileForm()
 
     info = Drawing.objects.get(name=drawing_name.lower())
     drawing = {'name':info.name}
-    context = {'drawing':drawing, 'form':file_form, 'errors':errors}
+    context = {'drawing':drawing, 'form':edit_form, 'errors':errors}
     return render(request, 'tracking/drawing_add.html', context)
 
 

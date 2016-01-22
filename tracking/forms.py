@@ -42,7 +42,7 @@ class DrawingAddForm(forms.Form):
     kind = forms.ModelChoiceField(queryset=DrawingKind.objects.all(),
                                     to_field_name='name')
     newfile = forms.FileField(label='Select a file',
-                              help_text='pdfs prefered, all formats accepted')
+                              help_text='<small>pdfs prefered</br>all formats accepted</br>only single file upload per submition</small>')
 
 
 class FileForm(forms.Form):
