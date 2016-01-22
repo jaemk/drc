@@ -24,6 +24,7 @@ from .models import Reply
 
 from .forms import SearchForm
 from .forms import FileForm
+from .forms import DrawingAddForm
 
 
 def _get_username(request):
@@ -62,12 +63,11 @@ def _pull_drawings(formdat):
     # start with simplest first, saving refex
     # search for last - return as soon as null
     cquery = None
-    print(formdat['comment_status'])
     if formdat['comment_status']:
         com_stat = formdat['comment_status']
-        if len(com_stat) > 1:
+        if len(com_stat) > 1: # user selected both options
             cquery = Comment.objects.prefetch_related('revision').all()
-        else:
+        else: # user selected one option
             check = {'open':True, 'closed':False}
             cquery = Comment.objects.prefetch_related('revision')\
                                     .filter(status=check[com_stat[0]])
@@ -88,14 +88,15 @@ def _pull_drawings(formdat):
 
     if formdat['block_name']:
         exp = formdat['block_name'].strip().lower().replace('*','.*')
-        dquery = dquery.filter(block__name__regex=exp)
+        blockquery = Block.objects.filter(name__regex=exp)
+        dquery = dquery.filter(block__in=blockquery)
 
     if formdat['drawing_status']:
         dquery = dquery.filter(status__status=formdat['drawing_status'])
 
 
     qstr = '^{}$'.format(formdat['drawing_name'].replace('*','.*'))
-    dquery = dquery.filter(name__regex=qstr)
+    dquery = dquery.filter(name__regex=qstr).order_by('name')
     return dquery
 
 
@@ -167,7 +168,8 @@ def drawing_edit(request, drawing_name):
                 newfile.save()
                 return httprespred(reverse('tracking:drawing_detail', args=[drawing_name]))
     else:
-        file_form = FileForm()
+        file_form = DrawingAddForm()
+        # file_form = FileForm()
 
     info = Drawing.objects.get(name=drawing_name.lower())
     drawing = {'name':info.name}
@@ -231,6 +233,7 @@ def open_comment_search(request):
     if not com:
         context = {'no_comments':'No open comments'}
         return httpresp('no open comments')
+    return httpresp(com)
     # query sets are being evaluated
     # revs = Revision.objects.filter(pk__in=com[:1].values_list('revision',
     #                                                        flat=True))

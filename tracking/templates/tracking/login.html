@@ -1,6 +1,10 @@
 {% extends 'tracking/base.html' %}
 
 {% block content %}
+<table id='login-table'>
+    <tr>
+        <td>
+
 <div id='login'>
     <form class='form-horizontal' name='LoginForm' action='/accounts/login?next=/tracking/' method='post'>
         {% csrf_token %}
@@ -24,6 +28,10 @@
         </div>
     </form>
 </div>
+
+        </td>
+    </tr>
+</table>
 
 {% endblock %}
 

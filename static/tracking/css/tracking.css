@@ -1,18 +1,23 @@
-.header {
+h1 {
+    margin:0;
+}
 
+.header {
+    margin: 0;
     height: 95px;
     background: #d3ac5f;
 
 }
 
-table, th, td {
-        border: 1px solid black;
-    th {
-        text-align: center;
-    }
+
+#login-table {
+    margin: 0 auto;
+    margin-top: 20px; 
+    border: 1px solid gray;
 }
 
 .info-table {
+    border:1px solid black;
     float: left;
     margin-top: 20; 
     margin-left: 10px;
@@ -20,9 +25,35 @@ table, th, td {
     text-align: left;
     padding: 10px;
 }
+
+.info-table td {
+    border:1px solid black;
+}
+
 .info-table th {
+    border:1px solid black;
     text-align: center;
 }
+
+
+
+.search-table{
+    border:1px solid black;
+}
+
+.search-table th {
+    border:1px solid black;
+    text-align: center;
+}
+.search-table td {
+    border:1px solid black;
+}
+
+
+/*
+.info-table th {
+    text-align: center;
+}*/
 
 .rev-table {
     text-align: center;

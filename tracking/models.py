@@ -11,7 +11,7 @@ class Project(models.Model):
         return '<Proj: {}'.format(self.name)
 
     def __str__(self):
-        return 'Project: {}'.format(self.name.upper())
+        return '{}'.format(self.name.upper())
 
 
 class Block(models.Model):
@@ -21,8 +21,18 @@ class Block(models.Model):
         return '<Block: {}>'.format(self.name)
 
     def __str__(self):
-        return 'Block: {}'.format(self.name.upper())
+        return '{}'.format(self.name.upper())
 
+
+class Phase(models.Model):
+    number = models.CharField(max_length=25)
+
+    def __repr__(self):
+        return '<Phase: {}>'.format(self.number)
+
+    def __str__(self):
+        return '{}'.format(self.number)
+    
 
 class DrawingStatus(models.Model):
     status = models.CharField(max_length=150)
@@ -31,7 +41,7 @@ class DrawingStatus(models.Model):
         return '<DwgStatus: {}>'.format(self.status)
 
     def __str__(self):
-        return 'DwgStatus: {}'.format(self.status.title())
+        return '{}'.format(self.status.title())
 
 
 class Department(models.Model):
@@ -51,7 +61,7 @@ class Discipline(models.Model):
         return '<Disc.: {}>'.format(self.name)
 
     def __str__(self):
-        return 'Discip: {}'.format(self.name.title())
+        return '{}'.format(self.name.title())
 
 
 class DrawingKind(models.Model):
@@ -61,18 +71,17 @@ class DrawingKind(models.Model):
         return '<DwgKind: {}>'.format(self.name)
 
     def __str__(self):
-        return 'DwgKind: {}'.format(self.name.title())
+        return '{}'.format(self.name.title())
 
 
 class Drawing(models.Model):
     name = models.CharField(max_length=250)
     desc = models.CharField(max_length=500, blank=True, null=True)
-    phase = models.CharField(max_length=25, blank=True, null=True)
+    phase = models.ForeignKey(Phase, on_delete=models.SET_NULL, null=True)
     received = models.BooleanField(default=False)
     project = models.ForeignKey(Project, on_delete=models.SET_NULL,
                                 null=True)
-    block = models.ForeignKey(Block, on_delete=models.SET_NULL,
-                              blank=True, null=True)
+    block = models.ManyToManyField(Block)
     status = models.ForeignKey(DrawingStatus, on_delete=models.SET_NULL,
                                blank=True, null=True)
     department = models.ForeignKey(Department, on_delete=models.SET_NULL,
@@ -92,7 +101,7 @@ class Drawing(models.Model):
         return '<Drawing: {}>'.format(self.name)
 
     def __str__(self):
-        return 'Drawing: {}'.format(self.name.upper())
+        return '{}'.format(self.name.upper())
 
     def get_attachment_names_ids(self):
         att = DrawingAttachment.objects.filter(drawing__id=self.id)
@@ -160,7 +169,7 @@ class Revision(models.Model):
         return '<Rev: {} on {}>'.format(self.number, self.drawing.name)
 
     def __str__(self):
-        return 'Rev: {} on dwg: {}'.format(self.number.upper(), self.drawing.name.upper())
+        return '{}:{}'.format(self.drawing.name.upper(), self.number.upper())
 
     def newest_comment(self):
         ''' Return most recent comment '''

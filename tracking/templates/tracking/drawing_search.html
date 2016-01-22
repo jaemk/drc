@@ -9,7 +9,7 @@
     <p> Note: use * for wildcard <br/>
         Only Drawing name is required </p>
     </br>
-    <table>
+    <table class='search-table'>
         <form action="{% url 'tracking:drawing_search' %}" method="post">
             {% csrf_token %}
             {{ form }}
