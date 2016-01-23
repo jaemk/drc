@@ -1,0 +1,36 @@
+{% block content %}
+
+    <tr><th> Name        </th>  <td> {{ drawing.name.upper }} </td></tr>
+    <tr><th> Description </th>  <td> {{ drawing.desc.title }} </td></tr>
+    <tr><th> Phase       </th>  <td> {{ drawing.phase.number }} </td></tr>
+    <tr><th> Received    </th>  <td> {{ drawing.received }} </td></tr>
+    <tr><th> Project     </th>  <td> {{ drawing.project.name }} </td></tr> 
+    <tr><th> Blocks       </th>  <td> {% for block in drawing.block %}
+                                        {{block.name }}, 
+                                     {% endfor %} </td></tr> 
+    {% if drawing.received %}
+    <tr><th> Status      </th>  <td> {{ drawing.status.status }} </td></tr>
+    
+    {% else %}
+    <tr><th> Expected    </th>  <td> {{drawing.expected.month}}-{{drawing.expected.day}}-{{drawing.expected.year}} </td></tr>
+    {% endif %}
+    
+    <tr><th> Department  </th>  <td> {{ drawing.department.name }} </td></tr>
+    <tr><th> Discipline  </th>  <td> {{ drawing.discipline.name.title }} </td></tr>
+    <tr><th> Type        </th>  <td> {{ drawing.kind.name.title }} </td></tr>
+    
+    <tr><th> Attachments </th>  <td> 
+    {% if drawing.attachments %}
+    <ul>
+        {% for attch in drawing.attachments %}
+        <li><a href="{% url 'tracking:serve_attachment' drawing_name=drawing.name file_id=attch.id %}">{{attch.name}}</a></li>
+        {% endfor %}
+    </ul>
+
+    {% else %}
+    None
+
+    {% endif %}
+    </td></tr>
+
+{% endblock %}

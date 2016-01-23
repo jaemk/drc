@@ -26,23 +26,32 @@ class SearchForm(forms.Form):
 
 class DrawingAddForm(forms.Form):
     name = forms.CharField(max_length=250, required=True)
-    desc = forms.CharField(max_length=500, required=True)
+    desc = forms.CharField(max_length=500, required=False)
     phase = forms.ModelChoiceField(queryset=Phase.objects.all(),
-                                   to_field_name='number')
+                                   to_field_name='number', required=False)
+    received = forms.MultipleChoiceField(required=False,
+                                         widget=forms.CheckboxSelectMultiple,
+                                         choices=(('yes', 'Yes'),
+                                                 ('no' , 'No')))
     project = forms.ModelChoiceField(queryset=Project.objects.all(), 
-                                     to_field_name='name')
+                                     to_field_name='name', required=False)
     block = forms.ModelMultipleChoiceField(queryset=Block.objects.all(),
-                                           to_field_name='name')
+                                           to_field_name='name', required=False)
     status = forms.ModelChoiceField(queryset=DrawingStatus.objects.all(),
-                                    to_field_name='status')
+                                    to_field_name='status', required=False)
     department = forms.ModelChoiceField(queryset=Department.objects.all(),
-                                        to_field_name='name')
+                                        to_field_name='name', required=False)
     discipline = forms.ModelChoiceField(queryset=Discipline.objects.all(),
-                                        to_field_name='name')
+                                        to_field_name='name', required=False)
     kind = forms.ModelChoiceField(queryset=DrawingKind.objects.all(),
-                                    to_field_name='name')
+                                    to_field_name='name', required=False)
     newfile = forms.FileField(label='Select a file',
-                              help_text='<small>pdfs prefered</br>all formats accepted</br>only single file upload per submition</small>')
+                              help_text='<small>pdfs prefered</br>all formats accepted</br>only single file upload per submition</small>', required=False)
+
+    def __init__(self, edit=False, *args, **kwargs):
+        super(DrawingAddForm, self).__init__(*args, **kwargs)
+        if edit:
+            self.fields['name'].required = False
 
 
 class FileForm(forms.Form):

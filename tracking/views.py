@@ -124,8 +124,9 @@ def _get_drawing_detail(drawing_name):
     dwg = Drawing.objects.get(name=drawing_name.lower())
     attch_names, attch_ids = dwg.get_attachment_names_ids()
     dwg_attch = [{'name':attch_names[i], 'id':attch_ids[i]} for i in range(len(attch_names))]
+    block = Block.objects.filter(pk__in=dwg.block.values_list('id', flat=True))
     drawing = {'name':drawing_name, 'project':dwg.project, 'desc':dwg.desc,
-               'phase':dwg.phase, 'block':dwg.block, 'received':dwg.received,
+               'phase':dwg.phase, 'block':block, 'received':dwg.received,
                'status':dwg.status, 'expected':dwg.expected,
                'department':dwg.department,  'discipline':dwg.discipline,
                'kind':dwg.kind,       'attachments':dwg_attch}
@@ -158,7 +159,6 @@ def drawing_edit(request, drawing_name):
     username = _get_username(request)
     errors = None
     if request.method == 'POST':
-        #drawing_form = DrawingForm() # want to initialize with current info and use drawing_form instead
         edit_form = DrawingAddForm(request.POST, request.FILES)
         # print(request.FILES['newfile'].__dict__)
         if edit_form.is_valid():
@@ -172,18 +172,18 @@ def drawing_edit(request, drawing_name):
                                                 drawing=drawing,
                                                 mod_by=username)
                     newfile.save()
-
+            if request.POST:
+                return httpresp(request.POST['name'])
+                
             return httprespred(reverse('tracking:drawing_detail', args=[drawing_name]))
+        return httpresp( 'Something went wrong')
     else:
-        detail = _get_drawing_detail(drawing_name)
-        drawing = detail['drawing']
-        current = {'name':drawing['name'], 'desc':drawing['desc']}
-        edit_form = DrawingAddForm(initial=current)
-        # file_form = FileForm()
+        edit_form = DrawingAddForm(edit=True)
+        # edit_form.fields['name'].required = False
 
-    info = Drawing.objects.get(name=drawing_name.lower())
-    drawing = {'name':info.name}
-    context = {'drawing':drawing, 'form':edit_form, 'errors':errors}
+    detail = _get_drawing_detail(drawing_name)
+    drawing = detail['drawing']
+    context = {'drawing':drawing, 'form':edit_form, 'errors':errors, 'is_edit':True}
     return render(request, 'tracking/drawing_add.html', context)
 
 
