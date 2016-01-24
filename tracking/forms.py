@@ -45,8 +45,6 @@ class DrawingAddForm(forms.Form):
                                         to_field_name='name', required=False)
     kind = forms.ModelChoiceField(queryset=DrawingKind.objects.all(),
                                     to_field_name='name', required=False)
-    newfile = forms.FileField(label='Select a file',
-                              help_text='<small>pdfs prefered</br>all formats accepted</br>only single file upload per submition</small>', required=False)
 
     def __init__(self, edit=False, *args, **kwargs):
         super(DrawingAddForm, self).__init__(*args, **kwargs)
@@ -56,5 +54,7 @@ class DrawingAddForm(forms.Form):
 
 class FileForm(forms.Form):
     newfile = forms.FileField(label='Select a file',
-                              help_text='pdfs prefered')
+                              help_text='''<small>pdfs prefered<br/>
+                                           all formats accepted<br/>
+                                           only single file upload per submission</small>''')
 

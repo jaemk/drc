@@ -1,0 +1,17 @@
+{% block content %}
+
+    <tr><th> Attachments </th>  <td> 
+    {% if drawing.attachments %}
+    <ul>
+        {% for attch in drawing.attachments %}
+        <li><a href="{% url 'tracking:serve_attachment' drawing_name=drawing.name file_id=attch.id %}">{{attch.name}}</a></li>
+        {% endfor %}
+    </ul>
+
+    {% else %}
+    None
+
+    {% endif %}
+    </td></tr>
+
+{% endblock %}

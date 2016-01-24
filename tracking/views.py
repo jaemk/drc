@@ -129,7 +129,7 @@ def _get_drawing_detail(drawing_name):
                'phase':dwg.phase, 'block':block, 'received':dwg.received,
                'status':dwg.status, 'expected':dwg.expected,
                'department':dwg.department,  'discipline':dwg.discipline,
-               'kind':dwg.kind,       'attachments':dwg_attch}
+               'kind':dwg.kind, 'attachments':dwg_attch }
 
     revs = Revision.objects.filter(drawing=dwg)
     revisions = [{'id':rev.id,         'number':rev.number,
@@ -139,7 +139,8 @@ def _get_drawing_detail(drawing_name):
     comments = [{'id':com.id,         'status':com.status,
                  'date':com.add_date, 'owner':com.owner} for com in coms]
 
-    context = {'drawing':drawing, 'revisions':revs, 'comments':comments}
+    context = {'drawing':drawing, 'revisions':revs,
+               'comments':comments}
     return context
 
 
@@ -163,8 +164,7 @@ def drawing_edit(request, drawing_name):
         # print(request.FILES['newfile'].__dict__)
         if edit_form.is_valid():
             if 'newfille' in request.FILES:
-                if request.FILES['newfile']._size > 10 * 1024 * 1024:
-                    # size > 10mb
+                if request.FILES['newfile']._size > 10 * 1024 * 1024: # size > 10mb
                     error = 'File too large. Please keey it under 10mb'
                 else:
                     drawing = Drawing.objects.get(name=drawing_name.lower())
@@ -173,17 +173,18 @@ def drawing_edit(request, drawing_name):
                                                 mod_by=username)
                     newfile.save()
             if request.POST:
+                #post_info = 
                 return httpresp(request.POST['name'])
                 
             return httprespred(reverse('tracking:drawing_detail', args=[drawing_name]))
+
         return httpresp( 'Something went wrong')
     else:
         edit_form = DrawingAddForm(edit=True)
-        # edit_form.fields['name'].required = False
 
     detail = _get_drawing_detail(drawing_name)
-    drawing = detail['drawing']
-    context = {'drawing':drawing, 'form':edit_form, 'errors':errors, 'is_edit':True}
+    drawing_det = detail['drawing']
+    context = {'drawing':drawing_det, 'form':edit_form, 'errors':errors, 'is_edit':True}
     return render(request, 'tracking/drawing_add.html', context)
 
 
@@ -194,7 +195,7 @@ def revision_search(request):
 
 @login_required
 def revision_detail(request, drawing_name, rev_no):
-    return httpresp('Revision detail for rev: {} on drawing: {}'\
+    return httpresp('''Revision detail for rev: {} on drawing: {}'''\
                     .format(rev_no, drawing_name))
 
 @login_required
