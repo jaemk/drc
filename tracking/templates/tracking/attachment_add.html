@@ -1,0 +1,20 @@
+{% extends 'tracking/base.html' %}
+
+{% block content %}
+
+<h3> {{ item.name.upper }} </h3>
+<a href="javascript:history.go(-1);">Return to prev</a>
+<br/>
+<br/>
+
+<form action="{% url 'tracking:add_attachment' item.type item.id %}" method="Post" enctype="multipart/form-data">
+    {% csrf_token %}
+        <table class="search-table">
+            <caption> New Info: Any fields you fill here will overwrite the current. </caption>
+        {{ form.as_table }}
+        </table>
+    <p><input type="submit" value="Submit Changes"/></p>
+</form>
+
+
+{% endblock %}

@@ -199,7 +199,7 @@ class Comment(models.Model):
                                blank=True, null=True)
 
     def __repr__(self):
-        return '<Comm: {} on {}>'.format(self.id, self.revision)
+        return '<Comm: {} on {}>'.format(self.id, self.revision.number)
 
     def __str__(self):
         return 'Comment by {} on - {}'.format(self.owner, self.revision)

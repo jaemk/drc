@@ -18,6 +18,8 @@ urlpatterns = [
         views.revision_detail, name='revision_detail'),
     url(r'^comment/(?P<com_id>[0-9_]+)/$',
         views.comment_detail, name='comment_detail'),
+    url(r'^attachment/add/(?P<type>[a-z]+)/(?P<item_id>[0-9_]+)/$',
+        views.add_attachment, name='add_attachment'),
 
     # quicklinks
     url(r'^search/open_comments/$', views.open_comment_search, name='open_comments'),

@@ -1,0 +1,46 @@
+{% extends 'tracking/base.html' %}
+
+{% block content %}
+
+<table class="info-table rev-table">
+    <col width="100">
+    <col width="120">
+    <col width="300">
+    <caption><strong> -- Revision Info #edit# -- </strong></caption>
+    <tr><th> No. </th><td> {{ revision.number }} </td></tr>
+    <tr><th> Date </th><td> {{ revision.date }} </td></tr>
+    <tr><th> Description </th><td> {{ revision.desc }} </td></tr>
+    <tr><th> Attachments </th><td>  
+    {% if revisions %}
+        {% for rev in revisions %}
+        <a href="{% url 'tracking:revision_detail' drawing_name=drawing.name rev_no=rev.number %}">{{ revision.number }}
+        {% endfor %}
+    {% else %}
+     No Attachments
+    {% endif %}
+    </td></tr>
+
+</table>
+
+</br>
+<div style="clear:both;"></div>
+
+<table class="info-table rev-table">
+<col width="50">
+<col width="75">
+<col width="120">
+<col width="200">
+<caption><strong> -- Comments #add# -- </strong></caption>
+<tr><th> ID </th><th> Status </th><th> Date </th><th> Owner </th></tr>
+{% if comments %}
+    {% for com in comments %}
+    <tr><td><a href="{% url 'tracking:comment_detail' com_id=com.id %}">{{ com.id }} </a></td><td>{{ com.status }}</td><td>{{com.date.month}}-{{com.date.day}}-{{com.date.year}}</td><td>{{ com.owner }}</td></tr>
+    {% endfor %}
+
+{% else %}
+<tr><td colspan="4" style="text-align:center"><strong> No Comments </strong></td></tr>
+
+{% endif %}
+</table>
+
+{% endblock %}

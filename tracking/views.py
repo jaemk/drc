@@ -195,8 +195,13 @@ def revision_search(request):
 
 @login_required
 def revision_detail(request, drawing_name, rev_no):
-    return httpresp('''Revision detail for rev: {} on drawing: {}'''\
-                    .format(rev_no, drawing_name))
+    dwg = Drawing.objects.get(name=drawing_name)
+    revision = Revision.objects.filter(drawing=dwg).get(number=rev_no)
+    comments = Comment.objects.filter(revision=revision)
+    context = {'revision':revision, 'comments':comments}
+    return render(request, 'tracking/revision_detail.html', context)
+    # return httpresp('''Revision detail for rev: {} on drawing: {}'''\
+    #                 .format(rev_no, drawing_name))
 
 @login_required
 def comment_detail(request, com_id):
@@ -212,7 +217,23 @@ def comment_detail(request, com_id):
                                               ', '.join([d.name for d in dwgs])))
 
 @login_required
-def attachment_edit(request, drc_type, identifier):
+def add_attachment(request, item_type, item_id):
+    if file_form.is_valid():
+        if 'newfille' in request.FILES:
+            if request.FILES['newfile']._size > 10 * 1024 * 1024: # size > 10mb
+                error = 'File too large. Please keey it under 10mb'
+            else:
+                # need to check item_type to query the right table
+                drawing = Drawing.objects.get(name=drawing_name.lower())
+                newfile = DrawingAttachment(upload=request.FILES['newfile'],
+                                            drawing=drawing,
+                                            mod_by=username)
+                newfile.save()
+    else:
+        file_form = FileForm()
+
+    context = {'form':file_form, 'item':{'type':item_type, 'id':item_id}}
+    return render(request, 'tracking/attachment_add.html', context)
     # move the drawing_edit functionality here 
     pass
 
@@ -244,10 +265,11 @@ def open_comment_search(request):
     if not com:
         context = {'no_comments':'No open comments'}
         return httpresp('no open comments')
-    return httpresp(com)
+    return httpresp('{}'.format('<br/>'.join([str(c) for c in com])))
     # query sets are being evaluated
-    # revs = Revision.objects.filter(pk__in=com[:1].values_list('revision',
+    # revs = Revision.objects.filter(pk__in=com.values_list('revision',
     #                                                        flat=True))
+    # comments = Comment.objects.
     # comments = [{'id':com[0].id, 'desc':com[0].desc, 'text':com[0].text,
     #              'status':com[0].status, 'owner':com[0].owner, 'revs':revs}]
     # if com[1:]:
