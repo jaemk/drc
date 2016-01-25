@@ -1,0 +1,31 @@
+{% extends 'tracking/base.html' %}
+
+{% block content %}
+
+    <h3> Open Comment Search Results </h3>
+    <a href="{% url 'tracking:index' %}">Return to Home</a>
+    
+    <br/>
+    <br/>
+
+    <table class="info-table rev-table">
+    <col width="50">
+    <col width="75">
+    <col width="120">
+    <col width="200">
+    <caption><strong> -- Open Comments -- </strong></caption>
+    <tr><th> ID </th><th> Date </th><th> Owner </th><th> Description </th><th> On Revs </th><th>No. Replies</th></tr>
+    {% if comments %}
+        {% for com in comments %}
+        <tr><td><a href="{% url 'tracking:comment_detail' com_id=com.id %}">{{ com.id }} </a></td><td>{{com.date.month}}-{{com.date.day}}-{{com.date.year}}</td><td>{{ com.owner }}</td><td>{{ com.desc }}</td><td>{{ com.revisions }}</td><td>{{ com.number_replies }}</tr>
+        {% endfor %}
+
+    {% else %}
+    <tr><td colspan="6" style="text-align:center"><strong> No Open Comments </strong></td></tr>
+
+    {% endif %}
+    </table>
+
+
+
+{% endblock %}

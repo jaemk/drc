@@ -160,23 +160,23 @@ def drawing_detail(request, drawing_name):
 def drawing_edit(request, drawing_name):
     ''' Serve form to edit drawing info or add attachments '''
     username = _get_username(request)
-    errors = None
     if request.method == 'POST':
-        edit_form = DrawingAddForm(request.POST)
+        edit_form = DrawingAddForm(True, request.POST)
+        print(edit_form.errors)
         if edit_form.is_valid():
             if request.POST:
                 #post_info = 
-                return httpresp(request.POST['name'])
+                return httpresp('{} - {}'.format(request.POST['name'], request.POST['received']))
                 
             return httprespred(reverse('tracking:drawing_detail', args=[drawing_name]))
-        return httpresp( 'Form was not valid.')
-
+        # else:
+        #     return httpresp( 'Form was not valid.')     
     else:
         edit_form = DrawingAddForm(edit=True)
 
     detail = _get_drawing_detail(drawing_name)
     drawing_det = detail['drawing']
-    context = {'drawing':drawing_det, 'form':edit_form, 'errors':errors, 'is_edit':True}
+    context = {'drawing':drawing_det, 'form':edit_form, 'is_edit':True}
     return render(request, 'tracking/drawing_add.html', context)
 
 
@@ -200,15 +200,17 @@ def comment_detail(request, com_id):
     com = Comment.objects.prefetch_related('revision')\
                          .filter(pk=com_id)
     comment = com.first()
+    com_attch = CommentAttachment.objects.filter(comment=comment)
+    revs = [rev for rev in comment.revision.all()]
     # revs = Revision.objects.prefetch_related('drawing')\
     #             .filter(pk__in=com.values_list('revision', flat=True))
     # dwgs = Drawing.objects.filter(pk__in=revs.values_list('drawing', flat=True))
-    com_attch = CommentAttachment.objects.filter(comment=comment)
+    
     reps = Reply.objects.filter(comment=comment).order_by('number')
     replies = [{'reply':rep, 'attachments':ReplyAttachment.objects.filter(reply=rep)} for rep in reps]
 
     context = {'comment':comment, 'replies':replies,
-               'com_attachments':com_attch}
+               'com_attachments':com_attch, 'revisions':revs}
                #  'revisions':revs,
                # 'drawings':dwgs, 'attachments':attachments}
     return render(request, 'tracking/comment_detail.html', context)
@@ -300,23 +302,19 @@ def serve_attachment(request, file_type, file_id):
 
 @login_required
 def open_comment_search(request):
-    com = Comment.objects.prefetch_related('revision')\
+    coms = Comment.objects.prefetch_related('revision')\
                          .filter(status=True)
-    if not com:
-        context = {'no_comments':'No open comments'}
-        return httpresp('no open comments')
-    return httpresp('{}'.format('<br/>'.join([str(c) for c in com])))
-    # query sets are being evaluated
-    # revs = Revision.objects.filter(pk__in=com.values_list('revision',
-    #                                                        flat=True))
-    # comments = Comment.objects.
-    # comments = [{'id':com[0].id, 'desc':com[0].desc, 'text':com[0].text,
-    #              'status':com[0].status, 'owner':com[0].owner, 'revs':revs}]
-    # if com[1:]:
-    #     for i in range(len(com[1:])):
-    #         newcom = com[i+1:]
-    #         revs = Revision.objects.filter(pk__in=newcom[:1].values_list('revision',
-    #                                                        flat=True))
-    #         comments.append({'id':newcom[:1].id, 'desc':newcom[:1].desc, 'text':newcom[:1].text,
-    #              'status':newcom[:1].status, 'owner':newcom[:1].owner, 'revs':revs})
-    # return httpresp(comments)
+    context = {'comments':coms}
+    return render(request, 'tracking/open_comments.html', context)
+
+
+@login_required
+def toggle_comment(request, com_id):
+    user = _get_username(request)
+    comment = Comment.objects.get(pk=com_id)
+    if comment.owner == user or comment.owner == None:
+        comment.status = not comment.status
+        comment.save()
+
+    return httprespred(reverse('tracking:comment_detail', args=[com_id]))
+    

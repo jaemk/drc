@@ -2,19 +2,33 @@
 
 {% block content %}
 
-<h3> {{ comment }} </h3>
+<h3> Comment by {{ comment.owner }} on 
+{% if revisions %}
+{% for rev in revisions %}
+<a href="{% url 'tracking:drawing_detail' rev.drawing.name %}">{{ rev.drawing.name.upper}}</a>-<a href="{% url 'tracking:revision_detail' drawing_name=rev.drawing.name rev_no=rev.number %}">{{rev.number.upper}}</a> ,
+{% endfor %}
+{% endif %}
+</h3>
 
 <table class="info-table rev-table">
     <col width="100">
     <col width="300">
     <caption><strong> -- Comment Info #edit# -- </strong></caption>
     <tr><th> ID </th><td> {{ comment.id }} </td></tr>
-    <tr><th> Status <a href="{% url 'tracking:comment_detail' com_id=comment.id %}" ><small><strong>Close</strong></small></a></th><td> {{ comment.open_closed }} </td></tr>
-    <tr><th> Date </th><td> {{ comment.date }} </td></tr>
+    <tr><th> Status <a href="{% url 'tracking:toggle_comment' com_id=comment.id %}" >
+    <small>
+        {% if comment.status %}
+            Close
+        {% else %}
+            Open
+        {% endif %}
+    </small></a></th><td> {{ comment.open_closed }} </td></tr>
+    
+    <tr><th> Date </th><td> {{ comment.add_date|date:"m-d-Y" }} </td></tr>
     <tr><th> Owner </th><td> {{ comment.owner }} </td></tr>
     <tr><th> Description </th><td> {{ comment.desc }} </td></tr>
     <tr><th> More Info </th><td> {{ comment.text}} </td></tr>
-    <tr><th> Attachments <a href="{% url 'tracking:add_attachment' item_type='comment' item_id=comment.id %} "> Add </a> </th><td>  
+    <tr><th> Attachments <a href="{% url 'tracking:add_attachment' item_type='comment' item_id=comment.id %} "><small> Add </small></a> </th><td>  
     {% if com_attachments %}
     <ul>
         {% for attch in com_attachments %}
@@ -33,7 +47,7 @@
 
 <table class="info-table rev-table">
 <col width="50">
-<col width="75">
+<col width="100">
 <col width="120">
 <col width="200">
 <col width="500">
@@ -41,7 +55,7 @@
 <tr><th> No. </th><th> Date </th><th> Owner </th><th> Description </th><th> Info </th><th>Attachments</th></tr>
 {% if replies %}
     {% for rep in replies %}
-    <tr><td><a href="{% url 'tracking:reply_detail' com_id=comment.id rep_id=rep.reply.id %}">{{ rep.reply.number }} </a></td><td>{{rep.reply.date.month}}-{{rep.reply.date.day}}-{{rep.reply.date.year}}</td><td>{{ rep.reply.owner }}</td><td>{{ rep.reply.desc }}</td><td>{{ rep.reply.text }}
+    <tr><td><a href="{% url 'tracking:reply_detail' com_id=comment.id rep_id=rep.reply.id %}">{{ rep.reply.number }} </a></td><td>{{rep.reply.add_date|date:"m-d-Y"}}</td><td>{{ rep.reply.owner }}</td><td>{{ rep.reply.desc }}</td><td>{{ rep.reply.text }}
     <td>
     
     {% if rep.attachments %}
@@ -58,7 +72,7 @@
     {% endfor %}
 
 {% else %}
-<tr><td colspan="5" style="text-align:center"><strong> No Replies </strong></td></tr>
+<tr><td colspan="6" style="text-align:center"><strong> No Replies </strong></td></tr>
 
 {% endif %}
 </table>

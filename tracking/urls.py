@@ -29,6 +29,6 @@ urlpatterns = [
 
     # quicklinks
     url(r'^search/open_comments/$', views.open_comment_search, name='open_comments'),
-
+    url(r'^comment/toggle/(?P<com_id>[0-9_]+)/$', views.toggle_comment, name='toggle_comment'),
     ]
 

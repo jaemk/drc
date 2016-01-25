@@ -16,8 +16,12 @@
 </table>
 {% endif %}
 
+
+
 <form action="{% url 'tracking:drawing_edit' drawing.name %}" method="Post" enctype="multipart/form-data">
     {% csrf_token %}
+    {{ form.errors }}
+{{ form.non_field_errors }}
         <table class="search-table">
             <caption> New Info: Any fields you fill here will overwrite the current. </caption>
         {{ form.as_table }}

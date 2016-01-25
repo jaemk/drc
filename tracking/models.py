@@ -230,6 +230,9 @@ class Comment(models.Model):
     def number_replies(self):
         return Reply.objects.filter(comment__id=self.id).count()
 
+    def revisions(self):
+        return '{}'.format(', '.join([str(rev) for rev in self.revision.all()]))
+
     def __repr__(self):
         return '<Comm: {} on {}>'.format(self.id, 
                ', '.join([str(rev) for rev in self.revision.all()]))

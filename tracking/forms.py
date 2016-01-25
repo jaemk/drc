@@ -29,10 +29,11 @@ class DrawingAddForm(forms.Form):
     desc = forms.CharField(max_length=500, required=False)
     phase = forms.ModelChoiceField(queryset=Phase.objects.all(),
                                    to_field_name='number', required=False)
-    received = forms.MultipleChoiceField(required=False,
-                                         widget=forms.CheckboxSelectMultiple,
-                                         choices=(('yes', 'Yes'),
-                                                 ('no' , 'No')))
+    received = forms.ChoiceField(required=False,
+                                         widget=forms.Select,
+                                         choices=((None, '--'),
+                                                  ('no', 'No'),
+                                                  ('yes' , 'Yes')))
     project = forms.ModelChoiceField(queryset=Project.objects.all(), 
                                      to_field_name='name', required=False)
     block = forms.ModelMultipleChoiceField(queryset=Block.objects.all(),

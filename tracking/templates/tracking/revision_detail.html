@@ -2,7 +2,7 @@
 
 {% block content %}
 
-<h3> {{ revision.drawing.name.upper }} - Rev: {{ revision.number.upper }}</h3>
+<h3> Revision: <a href="{% url 'tracking:drawing_detail' revision.drawing.name %}">{{ revision.drawing.name.upper }}</a> - Rev: {{ revision.number.upper }}</h3>
 
 <table class="info-table rev-table">
     <col width="100">
