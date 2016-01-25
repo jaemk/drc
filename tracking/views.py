@@ -19,8 +19,11 @@ from .models import Department
 from .models import Drawing
 from .models import DrawingAttachment
 from .models import Revision
+from .models import RevisionAttachment
 from .models import Comment
+from .models import CommentAttachment
 from .models import Reply
+from .models import ReplyAttachment
 
 from .forms import SearchForm
 from .forms import FileForm
@@ -129,15 +132,16 @@ def _get_drawing_detail(drawing_name):
                'phase':dwg.phase, 'block':block, 'received':dwg.received,
                'status':dwg.status, 'expected':dwg.expected,
                'department':dwg.department,  'discipline':dwg.discipline,
-               'kind':dwg.kind, 'attachments':dwg_attch }
+               'kind':dwg.kind, 'attachments':dwg_attch, 'id':dwg.id}
 
     revs = Revision.objects.filter(drawing=dwg)
     revisions = [{'id':rev.id,         'number':rev.number,
                   'date':rev.add_date, 'desc':rev.desc} for rev in revs]
 
     coms = Comment.objects.filter(revision__in=revs)
-    comments = [{'id':com.id,         'status':com.status,
-                 'date':com.add_date, 'owner':com.owner} for com in coms]
+    comments = coms
+    # comments = [{'id':com.id,         'status':com.status,
+    #              'date':com.add_date, 'owner':com.owner} for com in coms]
 
     context = {'drawing':drawing, 'revisions':revs,
                'comments':comments}
@@ -160,25 +164,15 @@ def drawing_edit(request, drawing_name):
     username = _get_username(request)
     errors = None
     if request.method == 'POST':
-        edit_form = DrawingAddForm(request.POST, request.FILES)
-        # print(request.FILES['newfile'].__dict__)
+        edit_form = DrawingAddForm(request.POST)
         if edit_form.is_valid():
-            if 'newfille' in request.FILES:
-                if request.FILES['newfile']._size > 10 * 1024 * 1024: # size > 10mb
-                    error = 'File too large. Please keey it under 10mb'
-                else:
-                    drawing = Drawing.objects.get(name=drawing_name.lower())
-                    newfile = DrawingAttachment(upload=request.FILES['newfile'],
-                                                drawing=drawing,
-                                                mod_by=username)
-                    newfile.save()
             if request.POST:
                 #post_info = 
                 return httpresp(request.POST['name'])
                 
             return httprespred(reverse('tracking:drawing_detail', args=[drawing_name]))
+        return httpresp( 'Form was not valid.')
 
-        return httpresp( 'Something went wrong')
     else:
         edit_form = DrawingAddForm(edit=True)
 
@@ -198,10 +192,10 @@ def revision_detail(request, drawing_name, rev_no):
     dwg = Drawing.objects.get(name=drawing_name)
     revision = Revision.objects.filter(drawing=dwg).get(number=rev_no)
     comments = Comment.objects.filter(revision=revision)
-    context = {'revision':revision, 'comments':comments}
+    attachments = RevisionAttachment.objects.filter(revision=revision)
+    context = {'revision':revision, 'comments':comments, 'attachments':attachments}
     return render(request, 'tracking/revision_detail.html', context)
-    # return httpresp('''Revision detail for rev: {} on drawing: {}'''\
-    #                 .format(rev_no, drawing_name))
+
 
 @login_required
 def comment_detail(request, com_id):
@@ -216,32 +210,77 @@ def comment_detail(request, com_id):
                                               ', '.join([r.number for r in revs]),
                                               ', '.join([d.name for d in dwgs])))
 
+
+@login_required
+def reply_detail(request, rep_id):
+    return httpresp('reply: {}'.format(rep_id))
+
+
+def _store_attch(request, item_type, item_id, username):
+    # need to check item_type to query the right table
+    if item_type == 'drawing':
+        drawing = Drawing.objects.get(pk=item_id)
+        newfile = DrawingAttachment(upload=request.FILES['newfile'],
+                                    drawing=drawing,
+                                    mod_by=username)
+        newfile.save()
+        return httprespred(reverse('tracking:drawing_detail',
+                           args=[drawing.name]))
+    elif item_type == 'revision':
+        revision = Revision.objects.get(pk=item_id)
+        newfile = RevisionAttachment(upload=request.FILES['newfile'],
+                                     revision=revision,
+                                     mod_by=username)
+        newfile.save()
+        return httprespred(reverse('tracking:revision_detail',
+                           args=[revision.drawing.name, revision.number]))
+    elif item_type == 'comment':
+        comment = Comment.objects.get(pk=item_id)
+        newfile = CommentAttachment(upload=request.FILES['newfile'],
+                                    comment=comment,
+                                    mod_by=username)
+        newfile.save()
+        return httprespred(reverse('tracking:comment_detail',
+                           args=[comment.id]))
+    elif item_type == 'reply':
+        reply = Reply.objects.get(pk=item_id)
+        newfile = ReplyAttachment(upload=request.FILES['newfile'],
+                                  reply=reply,
+                                  mod_by=username)
+        newfile.save()
+        return httprespred(reverse('tracking:reply_detail',
+                           args=[reply.comment.id, reply.id]))
+    
 @login_required
 def add_attachment(request, item_type, item_id):
-    if file_form.is_valid():
-        if 'newfille' in request.FILES:
-            if request.FILES['newfile']._size > 10 * 1024 * 1024: # size > 10mb
-                error = 'File too large. Please keey it under 10mb'
-            else:
-                # need to check item_type to query the right table
-                drawing = Drawing.objects.get(name=drawing_name.lower())
-                newfile = DrawingAttachment(upload=request.FILES['newfile'],
-                                            drawing=drawing,
-                                            mod_by=username)
-                newfile.save()
-    else:
-        file_form = FileForm()
+    username = _get_username(request)
+    if request.method == 'POST':
+        file_form = FileForm(request.POST, request.FILES)
+        if file_form.is_valid():
+            if 'newfile' in request.FILES:
+                if request.FILES['newfile']._size > 10 * 1024 * 1024: # size > 10mb
+                    error = 'File too large. Please keey it under 10mb'
+                else:
+                    return _store_attch(request, item_type, item_id, username)
 
-    context = {'form':file_form, 'item':{'type':item_type, 'id':item_id}}
+        else:
+            print('form not valid')
+
+        
+    
+    file_form = FileForm()
+
+    context = {'form':file_form, 'item':{'type':item_type, 'id':item_id}, 'username':username}
     return render(request, 'tracking/attachment_add.html', context)
-    # move the drawing_edit functionality here 
-    pass
+
 
 @login_required
-def serve_attachment(request, drawing_name=None, file_id=None):
+def serve_attachment(request, file_type, file_id):
     ''' Serve attachment for viewing or download '''
+    attch = {'drawing':DrawingAttachment, 'revision':RevisionAttachment,
+             'comment':CommentAttachment, 'repy':ReplyAttachment}
     try:
-        attachment = DrawingAttachment.objects.get(pk=file_id)
+        attachment = attch[file_type].objects.get(pk=file_id)
         filepath = attachment.upload.name
         filename = attachment.filename(filepath=filepath)
         full_path = os.path.join(settings.MEDIA_ROOT, filepath)
@@ -252,10 +291,10 @@ def serve_attachment(request, drawing_name=None, file_id=None):
 
     except Exception as ex:
         return httpresp('''Error: {} <br/>
-                        Unable to serve drawing: {}, file_id: {}
+                        Unable to serve file:  file_id: {}
                         </br>Please notify James Kominick
                         </br><a href="javascript:history.go(-1);">Return to prev</a>'''\
-                        .format(ex, drawing_name, file_id))
+                        .format(ex, file_id))
 
 
 @login_required

@@ -11,7 +11,21 @@
     <col width=300>
     <caption><strong> -- Drawing Info <a href="{% url 'tracking:drawing_edit' drawing.name %}"> edit </a>-- </strong></caption>
     {% include 'tracking/drawing_info_table.html' %}
-    {% include 'tracking/drawing_attachments.html' %}
+    
+    <tr><th> Attachments <a href="{% url 'tracking:add_attachment' item_type='drawing' item_id=drawing.id %}" > Add </a></th>  <td> 
+    {% if drawing.attachments %}
+    <ul>
+        {% for attch in drawing.attachments %}
+        <li><a target="_blank" href="{% url 'tracking:serve_attachment' file_type='drawing' file_id=attch.id %}">{{attch.name}}</a></li>
+        {% endfor %}
+    </ul>
+
+    {% else %}
+    None
+
+    {% endif %}
+    </td></tr>
+
 </table>
 
 <!-- <br/>
@@ -21,7 +35,7 @@
     <col width="100">
     <col width="120">
     <col width="300">
-    <caption><strong> -- Revision Info #add# -- </strong></caption>
+    <caption><strong> -- Revisions #add# -- </strong></caption>
     <tr><th> No. </th><th> Date </th><th> Description </th> </tr>
     {% if revisions %}
         {% for rev in revisions %}
@@ -45,7 +59,7 @@
 <tr><th> ID </th><th> Status </th><th> Date </th><th> Owner </th></tr>
 {% if comments %}
     {% for com in comments %}
-    <tr><td><a href="{% url 'tracking:comment_detail' com_id=com.id %}">{{ com.id }} </a></td><td>{{ com.status }}</td><td>{{com.date.month}}-{{com.date.day}}-{{com.date.year}}</td><td>{{ com.owner }}</td></tr>
+    <tr><td><a href="{% url 'tracking:comment_detail' com_id=com.id %}">{{ com.id }} </a></td><td>{{ com.open_closed }}</td><td>{{com.add_date.month}}-{{com.add_date.day}}-{{com.add_date.year}}</td><td>{{ com.owner }}</td></tr>
     {% endfor %}
 
 {% else %}

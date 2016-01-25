@@ -123,11 +123,19 @@ def drawing_upload_path(instance, filename):
     # time = timezone.now()
     # time.strftime('%m-%d-%Y_%H.%M.%S')
     # print(instance.__dict__)
-    getattr(instance, 'drawing_id', None)
-    getattr(instance, 'revision_id', None)
-    getattr(instance, 'comment_id', None)
-    print(instance.drawing_id)
-    return 'drawing/{}'.format(filename)
+    if getattr(instance, 'drawing_id', None):
+        print('drawing: {}'.format(instance.drawing_id))
+        return 'drawing/{}'.format(filename)
+    if getattr(instance, 'revision_id', None):
+        print('revision: {}'.format(instance.revision_id))
+        return 'revision/{}'.format(filename)
+    if getattr(instance, 'comment_id', None):
+        print('comment: {}'.format(instance.comment_id))
+        return 'comment/{}'.format(filename)
+    if getattr(instance, 'reply_id', None):
+        print('reply: {}'.format(instance.reply_id))
+        return 'reply/{}'.format(filename)
+    
 
 class DrawingAttachment(models.Model):
     upload = models.FileField(upload_to=drawing_upload_path,
@@ -179,6 +187,27 @@ class Revision(models.Model):
         ''' Return all comment objects '''
         pass
 
+class RevisionAttachment(models.Model):
+    upload = models.FileField(upload_to=drawing_upload_path,
+                              blank=True) # default='settings.BASE_DIR/pdfs/file.pdf')
+    revision = models.ForeignKey(Revision, on_delete=models.SET_NULL,
+                                blank=True, null=True)
+    mod_by = models.ForeignKey(User, on_delete=models.SET_NULL,
+                                blank=True, null=True)
+    add_date = models.DateTimeField(auto_now=True)
+    mod_date = models.DateTimeField(auto_now=True, null=True)
+
+    def filename(self, filepath=None):
+        if not filepath:
+            filepath = self.upload.name
+        return filepath.split('/')[-1]
+
+    def __repr__(self):
+        return '<Attachment: {}>'.format(self.upload)
+
+    def __str__(self):
+        return 'Att: {}'.format(self.filename())
+
 
 class Comment(models.Model):
     desc = models.CharField(max_length=500, blank=True, null=True)
@@ -198,15 +227,46 @@ class Comment(models.Model):
                                related_name='comment_mod_by',
                                blank=True, null=True)
 
+    def open_closed(self):
+        if self.status:
+            return 'Open'
+        else:
+            return 'Closed'
+
+    def number_replies(self):
+        return Reply.objects.filter(comment__id=self.id).count()
+
     def __repr__(self):
-        return '<Comm: {} on {}>'.format(self.id, self.revision.number)
+        return '<Comm: {} on {}>'.format(self.id, self.revision.all())
 
     def __str__(self):
-        return 'Comment by {} on - {}'.format(self.owner, self.revision)
+        return 'Comment by {} on - {}'.format(self.owner, self.revision.all())
+
+class CommentAttachment(models.Model):
+    upload = models.FileField(upload_to=drawing_upload_path,
+                              blank=True) # default='settings.BASE_DIR/pdfs/file.pdf')
+    comment = models.ForeignKey(Comment, on_delete=models.SET_NULL,
+                                blank=True, null=True)
+    mod_by = models.ForeignKey(User, on_delete=models.SET_NULL,
+                                blank=True, null=True)
+    add_date = models.DateTimeField(auto_now=True)
+    mod_date = models.DateTimeField(auto_now=True, null=True)
+
+    def filename(self, filepath=None):
+        if not filepath:
+            filepath = self.upload.name
+        return filepath.split('/')[-1]
+
+    def __repr__(self):
+        return '<Attachment: {}>'.format(self.upload)
+
+    def __str__(self):
+        return 'Att: {}'.format(self.filename())
 
 
 class Reply(models.Model):
-    desc = desc = models.CharField(max_length=500, blank=True, null=True)
+    number = models.IntegerField(default=0)
+    desc = models.CharField(max_length=500, blank=True, null=True)
     text = models.CharField(max_length=1000, blank=True, null=True)
     comment = models.ForeignKey(Comment, on_delete=models.SET_NULL,
                                 blank=True, null=True)
@@ -223,8 +283,33 @@ class Reply(models.Model):
                                related_name='reply_mod_by',
                                blank=True, null=True)
 
+    def __init__(self, *args, **kwargs):
+        super(Reply, self).__init__(*args, **kwargs)
+        self.number = self.comment.number_replies() + 1
+
     def __repr__(self):
         return '<Reply: {} on com. {}>'.format(self.id, self.comment)
 
     def __str__(self):
         return 'Reply to: {}'.format(self.comment)
+
+class ReplyAttachment(models.Model):
+    upload = models.FileField(upload_to=drawing_upload_path,
+                              blank=True) # default='settings.BASE_DIR/pdfs/file.pdf')
+    reply = models.ForeignKey(Reply, on_delete=models.SET_NULL,
+                                blank=True, null=True)
+    mod_by = models.ForeignKey(User, on_delete=models.SET_NULL,
+                                blank=True, null=True)
+    add_date = models.DateTimeField(auto_now=True)
+    mod_date = models.DateTimeField(auto_now=True, null=True)
+
+    def filename(self, filepath=None):
+        if not filepath:
+            filepath = self.upload.name
+        return filepath.split('/')[-1]
+
+    def __repr__(self):
+        return '<Attachment: {}>'.format(self.upload)
+
+    def __str__(self):
+        return 'Att: {}'.format(self.filename())

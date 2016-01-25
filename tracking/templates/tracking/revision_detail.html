@@ -2,6 +2,8 @@
 
 {% block content %}
 
+<h3> {{ revision.drawing.name.upper }} - Rev: {{ revision.number.upper }}</h3>
+
 <table class="info-table rev-table">
     <col width="100">
     <col width="120">
@@ -10,10 +12,10 @@
     <tr><th> No. </th><td> {{ revision.number }} </td></tr>
     <tr><th> Date </th><td> {{ revision.date }} </td></tr>
     <tr><th> Description </th><td> {{ revision.desc }} </td></tr>
-    <tr><th> Attachments </th><td>  
-    {% if revisions %}
-        {% for rev in revisions %}
-        <a href="{% url 'tracking:revision_detail' drawing_name=drawing.name rev_no=rev.number %}">{{ revision.number }}
+    <tr><th> Attachments <a href="{% url 'tracking:add_attachment' item_type='revision' item_id=revision.id %} "> Add </a> </th><td>  
+    {% if attachments %}
+        {% for attch in attachments %}
+        <a target="_blank" href="{% url 'tracking:serve_attachment' file_type='revision' file_id=attch.id %}">{{ revision.number }}</a>
         {% endfor %}
     {% else %}
      No Attachments
@@ -31,10 +33,10 @@
 <col width="120">
 <col width="200">
 <caption><strong> -- Comments #add# -- </strong></caption>
-<tr><th> ID </th><th> Status </th><th> Date </th><th> Owner </th></tr>
+<tr><th> ID </th><th> Status </th><th> Date </th><th> Owner </th><th> Description </th><th>No. Replies</th></tr>
 {% if comments %}
     {% for com in comments %}
-    <tr><td><a href="{% url 'tracking:comment_detail' com_id=com.id %}">{{ com.id }} </a></td><td>{{ com.status }}</td><td>{{com.date.month}}-{{com.date.day}}-{{com.date.year}}</td><td>{{ com.owner }}</td></tr>
+    <tr><td><a href="{% url 'tracking:comment_detail' com_id=com.id %}">{{ com.id }} </a></td><td>{{ com.open_closed }}</td><td>{{com.date.month}}-{{com.date.day}}-{{com.date.year}}</td><td>{{ com.owner }}</td><td>{{ com.desc }}</td><td>{{ com.number_replies }}</tr>
     {% endfor %}
 
 {% else %}
