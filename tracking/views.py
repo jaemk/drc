@@ -125,8 +125,8 @@ def drawing_search(request):
 
 def _get_drawing_detail(drawing_name):
     dwg = Drawing.objects.get(name=drawing_name.lower())
-    attch_names, attch_ids = dwg.get_attachment_names_ids()
-    dwg_attch = [{'name':attch_names[i], 'id':attch_ids[i]} for i in range(len(attch_names))]
+
+    dwg_attch = DrawingAttachment.objects.filter(drawing=dwg)
     block = Block.objects.filter(pk__in=dwg.block.values_list('id', flat=True))
     drawing = {'name':drawing_name, 'project':dwg.project, 'desc':dwg.desc,
                'phase':dwg.phase, 'block':block, 'received':dwg.received,
@@ -140,8 +140,6 @@ def _get_drawing_detail(drawing_name):
 
     coms = Comment.objects.filter(revision__in=revs)
     comments = coms
-    # comments = [{'id':com.id,         'status':com.status,
-    #              'date':com.add_date, 'owner':com.owner} for com in coms]
 
     context = {'drawing':drawing, 'revisions':revs,
                'comments':comments}
@@ -201,19 +199,24 @@ def revision_detail(request, drawing_name, rev_no):
 def comment_detail(request, com_id):
     com = Comment.objects.prefetch_related('revision')\
                          .filter(pk=com_id)
-    revs = Revision.objects.prefetch_related('drawing')\
-                .filter(pk__in=com.values_list('revision', flat=True))
-    dwgs = Drawing.objects.filter(pk__in=revs.values_list('drawing', flat=True))
-    return httpresp('''Comment detail id: {}<br/>
-                       made on revs: {}<br/>
-                       rev-dwgs: {}'''.format(com_id, 
-                                              ', '.join([r.number for r in revs]),
-                                              ', '.join([d.name for d in dwgs])))
+    comment = com.first()
+    # revs = Revision.objects.prefetch_related('drawing')\
+    #             .filter(pk__in=com.values_list('revision', flat=True))
+    # dwgs = Drawing.objects.filter(pk__in=revs.values_list('drawing', flat=True))
+    com_attch = CommentAttachment.objects.filter(comment=comment)
+    reps = Reply.objects.filter(comment=comment).order_by('number')
+    replies = [{'reply':rep, 'attachments':ReplyAttachment.objects.filter(reply=rep)} for rep in reps]
+
+    context = {'comment':comment, 'replies':replies,
+               'com_attachments':com_attch}
+               #  'revisions':revs,
+               # 'drawings':dwgs, 'attachments':attachments}
+    return render(request, 'tracking/comment_detail.html', context)
 
 
 @login_required
-def reply_detail(request, rep_id):
-    return httpresp('reply: {}'.format(rep_id))
+def reply_detail(request, com_id, rep_id):
+    return httpresp('reply: {} on com: {}'.format(rep_id, com_id))
 
 
 def _store_attch(request, item_type, item_id, username):
@@ -266,8 +269,6 @@ def add_attachment(request, item_type, item_id):
         else:
             print('form not valid')
 
-        
-    
     file_form = FileForm()
 
     context = {'form':file_form, 'item':{'type':item_type, 'id':item_id}, 'username':username}

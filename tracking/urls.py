@@ -29,5 +29,6 @@ urlpatterns = [
 
     # quicklinks
     url(r'^search/open_comments/$', views.open_comment_search, name='open_comments'),
+
     ]
 

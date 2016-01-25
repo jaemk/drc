@@ -14,9 +14,11 @@
     <tr><th> Description </th><td> {{ revision.desc }} </td></tr>
     <tr><th> Attachments <a href="{% url 'tracking:add_attachment' item_type='revision' item_id=revision.id %} "> Add </a> </th><td>  
     {% if attachments %}
+    <ul>
         {% for attch in attachments %}
-        <a target="_blank" href="{% url 'tracking:serve_attachment' file_type='revision' file_id=attch.id %}">{{ revision.number }}</a>
+        <li><a target="_blank" href="{% url 'tracking:serve_attachment' file_type='revision' file_id=attch.id %}">{{ attch.filename }}</a></li>
         {% endfor %}
+    </ul>
     {% else %}
      No Attachments
     {% endif %}
@@ -40,7 +42,7 @@
     {% endfor %}
 
 {% else %}
-<tr><td colspan="4" style="text-align:center"><strong> No Comments </strong></td></tr>
+<tr><td colspan="6" style="text-align:center"><strong> No Comments </strong></td></tr>
 
 {% endif %}
 </table>

@@ -103,12 +103,6 @@ class Drawing(models.Model):
     def __str__(self):
         return '{}'.format(self.name.upper())
 
-    def get_attachment_names_ids(self):
-        att = DrawingAttachment.objects.filter(drawing__id=self.id)
-        attch_names = [item.upload.name.split('/')[-1] for item in att]
-        attch_ids = [item.id for item in att]
-        return attch_names, attch_ids
-
     def newest_rev(self):
         ''' Return most recent revision object '''
         pass
@@ -237,10 +231,13 @@ class Comment(models.Model):
         return Reply.objects.filter(comment__id=self.id).count()
 
     def __repr__(self):
-        return '<Comm: {} on {}>'.format(self.id, self.revision.all())
+        return '<Comm: {} on {}>'.format(self.id, 
+               ', '.join([str(rev) for rev in self.revision.all()]))
 
     def __str__(self):
-        return 'Comment by {} on - {}'.format(self.owner, self.revision.all())
+        return 'Comment by {} on - {}'.format(self.owner,
+               ' & '.join([str(rev) for rev in self.revision.all()]))
+
 
 class CommentAttachment(models.Model):
     upload = models.FileField(upload_to=drawing_upload_path,
@@ -285,8 +282,8 @@ class Reply(models.Model):
 
     def __init__(self, *args, **kwargs):
         super(Reply, self).__init__(*args, **kwargs)
-        self.number = self.comment.number_replies() + 1
-
+        # self.number = self.comment.number_replies() + 1
+        
     def __repr__(self):
         return '<Reply: {} on com. {}>'.format(self.id, self.comment)
 
