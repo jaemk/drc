@@ -228,8 +228,6 @@ def drawing_add(request):
                 #     drawing_name = new_drawing
                 # if not check:
                 #     error = 'No changes detected'
-        else:
-            # print('not valid')
     
     else:
         add_form = DrawingAddForm(edit=False)
