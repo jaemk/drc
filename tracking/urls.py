@@ -12,9 +12,14 @@ urlpatterns = [
         views.drawing_detail, name='drawing_detail'),
     url(r'^drawing/(?P<drawing_name>[a-zA-Z0-9_-]+)/edit/$',
         views.drawing_edit, name='drawing_edit'),
+    url(r'^add/drawing/$', views.drawing_add, name='drawing_add'),
+
 
     url(r'^drawing/(?P<drawing_name>[a-zA-Z0-9_-]+)/rev/(?P<rev_no>[a-zA-Z0-9_\.-]+)/$',
         views.revision_detail, name='revision_detail'),
+    url(r'^drawing/(?P<drawing_name>[a-zA-Z0-9_-]+)/add/rev/$',
+        views.drawing_revision_add, name='drawing_revision_add'),
+    url(r'^add/revision/$', views.revision_add, name='revision_add'),
 
     url(r'^comment/(?P<com_id>[0-9_]+)/$',
         views.comment_detail, name='comment_detail'),

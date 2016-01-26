@@ -13,7 +13,7 @@
     <caption><strong> -- Drawing Info <a href="{% url 'tracking:drawing_edit' drawing.name %}"> edit </a>-- </strong></caption>
     {% include 'tracking/drawing_info_table.html' %}
     
-    <tr><th> Attachments <a href="{% url 'tracking:add_attachment' item_type='drawing' item_id=drawing.id %}" > Add </a>|<a href="{% url 'tracking:remove_attachment' item_type='drawing' item_id=drawing.id %}"> Remove </a></th>  <td> 
+    <tr><th> Attachments <a href="{% url 'tracking:add_attachment' item_type='drawing' item_id=drawing.id %}" ><small> Add </a>|<a href="{% url 'tracking:remove_attachment' item_type='drawing' item_id=drawing.id %}"> Remove </small></a></th>  <td> 
     {% if drawing.attachments %}
     <ul>
         {% for attch in drawing.attachments %}
@@ -29,8 +29,6 @@
 
 </table>
 
-<!-- <br/>
-<hr size=2> -->
 
 <table class="info-table rev-table">
     <col width="100">
@@ -56,11 +54,11 @@
 <col width="75">
 <col width="120">
 <col width="200">
-<caption><strong> -- Comments #add# -- </strong></caption>
-<tr><th> ID </th><th> Status </th><th> Date </th><th> Owner </th></tr>
+<caption><strong> -- Comments -- </strong></caption>
+<tr><th> ID </th><th> Status </th><th> Date </th><th> Owner </th><th> No. Replies</th></tr>
 {% if comments %}
     {% for com in comments %}
-    <tr><td><a href="{% url 'tracking:comment_detail' com_id=com.id %}">{{ com.id }} </a></td><td>{{ com.open_closed }}</td><td>{{com.add_date.month}}-{{com.add_date.day}}-{{com.add_date.year}}</td><td>{{ com.owner }}</td></tr>
+    <tr><td><a href="{% url 'tracking:comment_detail' com_id=com.id %}">{{ com.id }} </a></td><td>{{ com.open_closed }}</td><td>{{com.add_date|date:"m-d-Y"}}</td><td>{{ com.owner }}</td><td>{{ com.number_replies }}</tr>
     {% endfor %}
 
 {% else %}
@@ -69,13 +67,5 @@
 {% endif %}
 </table>
 
-<!-- <br/>
-
-    <h4> Comments </h4>
-    <a href="{% url 'tracking:drawing_search' %}">Return to Drawing Search</a>
-    
-    <br/>
-    <br/>
-    {% include 'tracking/results_list.html' with items=drawings %} -->
 
 {% endblock %}

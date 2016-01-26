@@ -45,7 +45,9 @@ class DrawingAddForm(forms.Form):
     project = forms.ModelChoiceField(queryset=Project.objects.all(), 
                                      to_field_name='name', required=False)
     block = forms.ModelMultipleChoiceField(queryset=Block.objects.all(),
-                                           to_field_name='name', required=False)
+                                           to_field_name='name', required=False,
+                                           help_text='''<small>ctrl+click 
+                                                        to select multiple</small>''')
     status = forms.ModelChoiceField(queryset=DrawingStatus.objects.all(),
                                     to_field_name='status', required=False)
     department = forms.ModelChoiceField(queryset=Department.objects.all(),

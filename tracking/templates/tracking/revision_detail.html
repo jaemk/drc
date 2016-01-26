@@ -2,7 +2,7 @@
 
 {% block content %}
 
-<h3> Revision: <a href="{% url 'tracking:drawing_detail' revision.drawing.name %}">{{ revision.drawing.name.upper }}</a> - Rev: {{ revision.number.upper }}</h3>
+<h3> Revision: {{ revision.number.upper }} on <a href="{% url 'tracking:drawing_detail' revision.drawing.name %}">{{ revision.drawing.name.upper }}</a></h3>
 
 <table class="info-table rev-table">
     <col width="100">
@@ -12,7 +12,7 @@
     <tr><th> No. </th><td> {{ revision.number }} </td></tr>
     <tr><th> Date </th><td> {{ revision.date }} </td></tr>
     <tr><th> Description </th><td> {{ revision.desc }} </td></tr>
-    <tr><th> Attachments <a href="{% url 'tracking:add_attachment' item_type='revision' item_id=revision.id %} "> Add </a> </th><td>  
+    <tr><th> Attachments <a href="{% url 'tracking:add_attachment' item_type='revision' item_id=revision.id %} "><small> Add </a>|<a href="{% url 'tracking:remove_attachment' item_type='revision' item_id=revision.id %}"> Remove </small></a></th><td>  
     {% if attachments %}
     <ul>
         {% for attch in attachments %}

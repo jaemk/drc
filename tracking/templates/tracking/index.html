@@ -10,18 +10,18 @@
     <h3> Search: </h3>
     <h4><a href="{% url 'tracking:drawing_search' %}">Drawing Search</a></h4>
 
-    <h3 style="margin-top:100px;"> Add: </h3>
+    <h3 style="margin-top:50px;"> Add: </h3>
     <ul>
-        <li><a href="{% url 'tracking:index' %}">Drawings</a></li>
-        <li><a href="{% url 'tracking:index' %}">Revisions</a></li>
-        <li><a href="{% url 'tracking:index' %}">Comments</a></li>
+        <li><a href="{% url 'tracking:drawing_add' %}">Drawing</a></li>
+        <li><a href="{% url 'tracking:index' %}">Revision</a></li>
+        <li><a href="{% url 'tracking:index' %}">Comment</a></li>
     </ul>
 
-    <h3> Edit: </h3>
+    <!-- <h3> Edit: </h3>
     <ul>
         <li><a href="{% url 'tracking:index' %}">Drawings</a></li>
         <li><a href="{% url 'tracking:index' %}">Revisions</a></li>
         <li><a href="{% url 'tracking:index' %}">Comments</a></li>
-    </ul>
+    </ul> -->
 
 {% endblock %}

@@ -31,30 +31,30 @@ from .forms import DrawingAddForm
 from .forms import RemoveFileForm
 
 
-def _get_username(request):
+def _get_user(request):
     ''' Helper to return user from a request '''
     if request.user.is_authenticated():
-        username = request.user
+        user = request.user
     else:
-        username = None
+        user = None
 
-    return username
+    return user
 
 
 def logout_view(request):
     ''' Logout confirmation '''
-    username = request.user
+    user = request.user
     logout(request)
     return httpresp('''Goodbye {} !<br>
                     You\'ve successfully logged out!<br>
-                    <a href="/">return to homepage</a>'''.format(username))
+                    <a href="/">return to homepage</a>'''.format(user))
 
 
 @login_required
 def index(request):
     ''' Homepage '''
-    username = _get_username(request)
-    return render(request, 'tracking/index.html', {'username':username})
+    user = _get_user(request)
+    return render(request, 'tracking/index.html', {'username':user})
 
 
 ### Drawing Search ###
@@ -107,7 +107,7 @@ def _pull_drawings(formdat):
 @login_required
 def drawing_search(request):
     ''' Serve up drawing search form with optional qualifiers '''
-    username = _get_username(request)
+    user = _get_user(request)
     drawings = False
     if request.method == 'POST':
         form = SearchForm(request.POST)
@@ -117,7 +117,7 @@ def drawing_search(request):
     else:
         form = SearchForm()
 
-    context = {'username':username, 'form':form.as_table(), 
+    context = {'username':user, 'form':form.as_table(), 
                'drawings':drawings}
     if drawings != False:
         return render(request, 'tracking/drawing_results.html', context)
@@ -151,9 +151,9 @@ def _get_drawing_detail(drawing_name):
 def drawing_detail(request, drawing_name):
     ''' Fetch drawing details, and linked attachments, 
         revisions, comments, and replies'''
-    username = _get_username(request)
+    user = _get_user(request)
     context = _get_drawing_detail(drawing_name)
-    context['username'] = username
+    context['username'] = user
     return render(request, 'tracking/drawing_detail.html', context)
 
 
@@ -186,8 +186,8 @@ def _update_drawing_info(drawing_name, post_info):
 
 @login_required
 def drawing_edit(request, drawing_name):
-    ''' Serve form to edit drawing info or add attachments '''
-    username = _get_username(request)
+    ''' Serve form to edit drawing info '''
+    user = _get_user(request)
     error = None
     if request.method == 'POST':
         edit_form = DrawingAddForm(True, request.POST)
@@ -209,6 +209,44 @@ def drawing_edit(request, drawing_name):
     context = {'drawing':drawing_det, 'form':edit_form, 'is_edit':True, 'error':error}
     return render(request, 'tracking/drawing_add.html', context)
 
+
+@login_required
+def drawing_add(request):
+    ''' Serve form to add drawing info '''
+    user = _get_user(request)
+    error = None
+    if request.method == 'POST':
+        add_form = DrawingAddForm(False, request.POST)
+        if add_form.is_valid():
+            # print('valid')
+            if request.POST:
+                post_info = add_form.cleaned_data
+                # print(post_info)
+                return httpresp('{}'.format(['{}:{}'.format(k,v) for k,v in post_info.items()]))
+                # new_drawing, check = _update_drawing_info(drawing_name, post_info)
+                # if new_drawing:
+                #     drawing_name = new_drawing
+                # if not check:
+                #     error = 'No changes detected'
+        else:
+            # print('not valid')
+    
+    else:
+        add_form = DrawingAddForm(edit=False)
+
+    # detail = _get_drawing_detail(drawing_name)
+    # drawing_det = detail['drawing']
+    context = {'form':add_form, 'is_edit':False, 'error':error}
+    return render(request, 'tracking/drawing_add.html', context)
+
+
+@login_required
+def drawing_revision_add(request, drawing_name):
+    pass
+
+@login_required
+def revision_add(request):
+    pass
 
 @login_required
 def revision_search(request):
@@ -251,7 +289,7 @@ def reply_detail(request, com_id, rep_id):
     return httpresp('reply: {} on com: {}'.format(rep_id, com_id))
 
 
-def _store_attch(request, item_type, item_id, username):
+def _store_attch(request, item_type, item_id, user):
     ''' store upload to correct table specified by item_type '''
     attch = {'drawing':DrawingAttachment, 'revision':RevisionAttachment,
              'comment':CommentAttachment, 'reply':ReplyAttachment}
@@ -262,7 +300,7 @@ def _store_attch(request, item_type, item_id, username):
     obj = table[item_type].objects.get(pk=item_id)
     newfile = attch[item_type](upload=request.FILES['newfile'],
                                link=obj,
-                               mod_by=username)
+                               mod_by=user)
     # print(newfile.upload.name)
     # print(newfile.filename())
     # print(newfile.link)
@@ -280,7 +318,7 @@ def _store_attch(request, item_type, item_id, username):
 
 @login_required
 def add_attachment(request, item_type, item_id):
-    username = _get_username(request)
+    user = _get_user(request)
     if request.method == 'POST':
         file_form = FileForm(request.POST, request.FILES)
         if file_form.is_valid():
@@ -288,26 +326,53 @@ def add_attachment(request, item_type, item_id):
                 if request.FILES['newfile']._size > 10 * 1024 * 1024: # size > 10mb
                     error = 'File too large. Please keey it under 10mb'
                 else:
-                    return _store_attch(request, item_type, item_id, username)
+                    return _store_attch(request, item_type, item_id, user)
 
         else:
             print('form not valid')
 
     file_form = FileForm()
 
-    context = {'form':file_form, 'item':{'type':item_type, 'id':item_id}, 'username':username}
+    context = {'form':file_form, 'item':{'type':item_type, 'id':item_id}, 'username':user}
     return render(request, 'tracking/attachment_add.html', context)
+
+
+def _remove_attch(request, item_type, item_id, info):
+    ''' remove & delete specified uploaded attachments '''
+    attch = {'drawing':DrawingAttachment, 'revision':RevisionAttachment,
+             'comment':CommentAttachment, 'reply':ReplyAttachment}
+    table = {'drawing':Drawing, 'revision':Revision,
+             'comment':Comment, 'reply':Reply}
+    detail = {'drawing':'tracking:drawing_detail', 'revision':'tracking:revision_detail',
+             'comment':'tracking:comment_detail', 'reply':'tracking:reply_detail'}
+    obj = table[item_type].objects.get(pk=item_id)
+    
+    for f in info['files']:
+        filepath = f.upload.name
+        f.delete()
+        os.remove(os.path.join(settings.MEDIA_ROOT, filepath))
+
+    args = { 'drawing':[obj.name]        if item_type == 'drawing' else None, 
+            'revision':[obj.drawing.name, 
+                        obj.number]      if item_type == 'revision' else None,
+             'comment':[obj.id]          if item_type == 'comment' else None, 
+               'reply':[obj.comment.id,
+                        obj.number]      if item_type == 'reply' else None}
+    return httprespred(reverse(detail[item_type],
+                           args=args[item_type]))
 
 
 @login_required
 def remove_attachment(request, item_type, item_id):
-    username = _get_username(request)
+    user = _get_user(request)
     if request.method == 'POST':
         remove_file_form = RemoveFileForm(item_type, item_id, request.POST, request.FILES)
         if remove_file_form.is_valid():
             info = remove_file_form.cleaned_data
             # do something like _store_attch
-            return httpresp('{}'.format(', '.join([str(f) for f in info['files']])))
+            return _remove_attch(request, item_type, item_id, info)
+            # return httpresp('{}'.format(', '.join([str(f) for f in info['files']])))
+
             # return httpresp('{}'.format(','.join(['{}:{}'.format(k, v) for k, v in info.items()])))
             # if 'newfile' in request.FILES:
             #     if request.FILES['newfile']._size > 10 * 1024 * 1024: # size > 10mb
@@ -320,7 +385,7 @@ def remove_attachment(request, item_type, item_id):
 
     remove_file_form = RemoveFileForm(item_type, item_id)
 
-    context = {'form':remove_file_form, 'item':{'type':item_type, 'id':item_id}, 'username':username}
+    context = {'form':remove_file_form, 'item':{'type':item_type, 'id':item_id}, 'username':user}
     return render(request, 'tracking/attachment_remove.html', context)
 
 
@@ -357,7 +422,7 @@ def open_comment_search(request):
 
 @login_required
 def toggle_comment(request, com_id):
-    user = _get_username(request)
+    user = _get_user(request)
     comment = Comment.objects.get(pk=com_id)
     if comment.owner == user or comment.owner == None:
         comment.status = not comment.status

@@ -28,7 +28,7 @@
     <tr><th> Owner </th><td> {{ comment.owner }} </td></tr>
     <tr><th> Description </th><td> {{ comment.desc }} </td></tr>
     <tr><th> More Info </th><td> {{ comment.text}} </td></tr>
-    <tr><th> Attachments <a href="{% url 'tracking:add_attachment' item_type='comment' item_id=comment.id %} "><small> Add </small></a> </th><td>  
+    <tr><th> Attachments <a href="{% url 'tracking:add_attachment' item_type='comment' item_id=comment.id %} "><small> Add </a>|<a href="{% url 'tracking:remove_attachment' item_type='comment' item_id=comment.id %}"> Remove </small></a> </th><td>  
     {% if com_attachments %}
     <ul>
         {% for attch in com_attachments %}
