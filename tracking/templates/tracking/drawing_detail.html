@@ -13,7 +13,7 @@
     <caption><strong> -- Drawing Info <a href="{% url 'tracking:drawing_edit' drawing.name %}"> edit </a>-- </strong></caption>
     {% include 'tracking/drawing_info_table.html' %}
     
-    <tr><th> Attachments <a href="{% url 'tracking:add_attachment' item_type='drawing' item_id=drawing.id %}" > Add </a></th>  <td> 
+    <tr><th> Attachments <a href="{% url 'tracking:add_attachment' item_type='drawing' item_id=drawing.id %}" > Add </a>|<a href="{% url 'tracking:remove_attachment' item_type='drawing' item_id=drawing.id %}"> Remove </a></th>  <td> 
     {% if drawing.attachments %}
     <ul>
         {% for attch in drawing.attachments %}

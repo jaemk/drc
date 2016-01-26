@@ -26,6 +26,8 @@ urlpatterns = [
         views.add_attachment, name='add_attachment'),
     url(r'^attachment/serve/(?P<file_type>(drawing|revision|comment|reply))/(?P<file_id>[0-9_]+)/$',
         views.serve_attachment, name='serve_attachment'),
+    url(r'^attachment/remove/(?P<item_type>(drawing|revision|comment|reply))/(?P<item_id>[0-9_]+)/$',
+        views.remove_attachment, name='remove_attachment'),
 
     # quicklinks
     url(r'^search/open_comments/$', views.open_comment_search, name='open_comments'),

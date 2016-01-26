@@ -28,6 +28,7 @@ from .models import ReplyAttachment
 from .forms import SearchForm
 from .forms import FileForm
 from .forms import DrawingAddForm
+from .forms import RemoveFileForm
 
 
 def _get_username(request):
@@ -126,7 +127,7 @@ def drawing_search(request):
 def _get_drawing_detail(drawing_name):
     dwg = Drawing.objects.get(name=drawing_name.lower())
 
-    dwg_attch = DrawingAttachment.objects.filter(drawing=dwg)
+    dwg_attch = DrawingAttachment.objects.filter(link=dwg)
     block = Block.objects.filter(pk__in=dwg.block.values_list('id', flat=True))
     drawing = {'name':drawing_name, 'project':dwg.project, 'desc':dwg.desc,
                'phase':dwg.phase, 'block':block, 'received':dwg.received,
@@ -219,7 +220,7 @@ def revision_detail(request, drawing_name, rev_no):
     dwg = Drawing.objects.get(name=drawing_name)
     revision = Revision.objects.filter(drawing=dwg).get(number=rev_no)
     comments = Comment.objects.filter(revision=revision)
-    attachments = RevisionAttachment.objects.filter(revision=revision)
+    attachments = RevisionAttachment.objects.filter(link=revision)
     context = {'revision':revision, 'comments':comments, 'attachments':attachments}
     return render(request, 'tracking/revision_detail.html', context)
 
@@ -229,14 +230,14 @@ def comment_detail(request, com_id):
     com = Comment.objects.prefetch_related('revision')\
                          .filter(pk=com_id)
     comment = com.first()
-    com_attch = CommentAttachment.objects.filter(comment=comment)
+    com_attch = CommentAttachment.objects.filter(link=comment)
     revs = [rev for rev in comment.revision.all()]
     # revs = Revision.objects.prefetch_related('drawing')\
     #             .filter(pk__in=com.values_list('revision', flat=True))
     # dwgs = Drawing.objects.filter(pk__in=revs.values_list('drawing', flat=True))
     
     reps = Reply.objects.filter(comment=comment).order_by('number')
-    replies = [{'reply':rep, 'attachments':ReplyAttachment.objects.filter(reply=rep)} for rep in reps]
+    replies = [{'reply':rep, 'attachments':ReplyAttachment.objects.filter(link=rep)} for rep in reps]
 
     context = {'comment':comment, 'replies':replies,
                'com_attachments':com_attch, 'revisions':revs}
@@ -251,40 +252,32 @@ def reply_detail(request, com_id, rep_id):
 
 
 def _store_attch(request, item_type, item_id, username):
-    # need to check item_type to query the right table
-    if item_type == 'drawing':
-        drawing = Drawing.objects.get(pk=item_id)
-        newfile = DrawingAttachment(upload=request.FILES['newfile'],
-                                    drawing=drawing,
-                                    mod_by=username)
-        newfile.save()
-        return httprespred(reverse('tracking:drawing_detail',
-                           args=[drawing.name]))
-    elif item_type == 'revision':
-        revision = Revision.objects.get(pk=item_id)
-        newfile = RevisionAttachment(upload=request.FILES['newfile'],
-                                     revision=revision,
-                                     mod_by=username)
-        newfile.save()
-        return httprespred(reverse('tracking:revision_detail',
-                           args=[revision.drawing.name, revision.number]))
-    elif item_type == 'comment':
-        comment = Comment.objects.get(pk=item_id)
-        newfile = CommentAttachment(upload=request.FILES['newfile'],
-                                    comment=comment,
-                                    mod_by=username)
-        newfile.save()
-        return httprespred(reverse('tracking:comment_detail',
-                           args=[comment.id]))
-    elif item_type == 'reply':
-        reply = Reply.objects.get(pk=item_id)
-        newfile = ReplyAttachment(upload=request.FILES['newfile'],
-                                  reply=reply,
-                                  mod_by=username)
-        newfile.save()
-        return httprespred(reverse('tracking:reply_detail',
-                           args=[reply.comment.id, reply.id]))
-    
+    ''' store upload to correct table specified by item_type '''
+    attch = {'drawing':DrawingAttachment, 'revision':RevisionAttachment,
+             'comment':CommentAttachment, 'reply':ReplyAttachment}
+    table = {'drawing':Drawing, 'revision':Revision,
+             'comment':Comment, 'reply':Reply}
+    detail = {'drawing':'tracking:drawing_detail', 'revision':'tracking:revision_detail',
+             'comment':'tracking:comment_detail', 'reply':'tracking:reply_detail'}
+    obj = table[item_type].objects.get(pk=item_id)
+    newfile = attch[item_type](upload=request.FILES['newfile'],
+                               link=obj,
+                               mod_by=username)
+    # print(newfile.upload.name)
+    # print(newfile.filename())
+    # print(newfile.link)
+    # print(newfile.mod_by)
+    newfile.save()
+    args = { 'drawing':[obj.name]        if item_type == 'drawing' else None, 
+            'revision':[obj.drawing.name, 
+                        obj.number]      if item_type == 'revision' else None,
+             'comment':[obj.id]          if item_type == 'comment' else None, 
+               'reply':[obj.comment.id,
+                        obj.number]      if item_type == 'reply' else None}
+    return httprespred(reverse(detail[item_type],
+                           args=args[item_type]))
+
+
 @login_required
 def add_attachment(request, item_type, item_id):
     username = _get_username(request)
@@ -304,6 +297,31 @@ def add_attachment(request, item_type, item_id):
 
     context = {'form':file_form, 'item':{'type':item_type, 'id':item_id}, 'username':username}
     return render(request, 'tracking/attachment_add.html', context)
+
+
+@login_required
+def remove_attachment(request, item_type, item_id):
+    username = _get_username(request)
+    if request.method == 'POST':
+        remove_file_form = RemoveFileForm(item_type, item_id, request.POST, request.FILES)
+        if remove_file_form.is_valid():
+            info = remove_file_form.cleaned_data
+            # do something like _store_attch
+            return httpresp('{}'.format(', '.join([str(f) for f in info['files']])))
+            # return httpresp('{}'.format(','.join(['{}:{}'.format(k, v) for k, v in info.items()])))
+            # if 'newfile' in request.FILES:
+            #     if request.FILES['newfile']._size > 10 * 1024 * 1024: # size > 10mb
+            #         error = 'File too large. Please keey it under 10mb'
+            #     else:
+            #         return _store_attch(request, item_type, item_id, username)
+
+        else:
+            print('form not valid')
+
+    remove_file_form = RemoveFileForm(item_type, item_id)
+
+    context = {'form':remove_file_form, 'item':{'type':item_type, 'id':item_id}, 'username':username}
+    return render(request, 'tracking/attachment_remove.html', context)
 
 
 @login_required

@@ -6,6 +6,14 @@ from .models import Department
 from .models import Discipline
 from .models import DrawingKind
 from .models import DrawingStatus
+from .models import Drawing
+from .models import Revision
+from .models import Comment
+from .models import Reply
+from .models import DrawingAttachment
+from .models import RevisionAttachment
+from .models import CommentAttachment
+from .models import ReplyAttachment
 import datetime
 
 
@@ -58,4 +66,33 @@ class FileForm(forms.Form):
                               help_text='''<small>pdfs prefered<br/>
                                            all formats accepted<br/>
                                            only single file upload per submission</small>''')
+
+
+def _get_file_set(item_type, item_id):
+    ''' fetch the set of attachments for specified item '''
+    attch = {'drawing':DrawingAttachment, 'revision':RevisionAttachment,
+             'comment':CommentAttachment, 'reply':ReplyAttachment}
+    table = {'drawing':Drawing, 'revision':Revision,
+             'comment':Comment, 'reply':Reply}
+
+    obj = table[item_type].objects.get(pk=item_id)
+    attachments = attch[item_type].objects.filter(link=obj)
+    return attachments
+
+
+class RemoveFileForm(forms.Form):
+    def __init__(self, item_type=None, item_id=None, *args, **kwargs):
+        if not item_type or not item_id:
+            return    
+        super(RemoveFileForm, self).__init__(*args, **kwargs)
+        queryset = _get_file_set(item_type, item_id)
+        self.fields['files'] = forms.ModelMultipleChoiceField(required=False,
+                                       widget=forms.CheckboxSelectMultiple,
+                                       queryset=queryset,
+                                       label='Select files to remove',
+                                       help_text='<small>select multiple to delete</small>')
+                                       # choices=(('backend', 'Shown'),
+                                       #          ('backend', 'Shown')))
+
+
 

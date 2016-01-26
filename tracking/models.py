@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
 import datetime
+import os
 
 
 class Project(models.Model):
@@ -113,33 +114,30 @@ class Drawing(models.Model):
 
 
 def drawing_upload_path(instance, filename):
+    ''' return file upload path for each type of attch'''
     # upload to MEDIA_ROOT/drawing/<filename>
     # time = timezone.now()
     # time.strftime('%m-%d-%Y_%H.%M.%S')
     # print(instance.__dict__)
-    if getattr(instance, 'drawing_id', None):
-        print('drawing: {}'.format(instance.drawing_id))
-        return 'drawing/{}'.format(filename)
-    if getattr(instance, 'revision_id', None):
-        print('revision: {}'.format(instance.revision_id))
-        return 'revision/{}'.format(filename)
-    if getattr(instance, 'comment_id', None):
-        print('comment: {}'.format(instance.comment_id))
-        return 'comment/{}'.format(filename)
-    if getattr(instance, 'reply_id', None):
-        print('reply: {}'.format(instance.reply_id))
-        return 'reply/{}'.format(filename)
+    cat = getattr(instance, 'file_cat', None)
+    if not cat:
+        raise Exception
+
+    # print('{}: {}'.format(cat, instance.link_id))
+    # print(os.path.join(cat, str(instance.link_id), filename))
+    return os.path.join(cat, str(instance.link_id), filename)
     
 
 class DrawingAttachment(models.Model):
     upload = models.FileField(upload_to=drawing_upload_path,
                               blank=True) # default='settings.BASE_DIR/pdfs/file.pdf')
-    drawing = models.ForeignKey(Drawing, on_delete=models.SET_NULL,
+    link = models.ForeignKey(Drawing, on_delete=models.SET_NULL,
                                 blank=True, null=True)
     mod_by = models.ForeignKey(User, on_delete=models.SET_NULL,
                                 blank=True, null=True)
     add_date = models.DateTimeField(auto_now=True)
     mod_date = models.DateTimeField(auto_now=True, null=True)
+    file_cat = models.CharField(max_length=15, default='drawing')
 
     def filename(self, filepath=None):
         if not filepath:
@@ -184,12 +182,13 @@ class Revision(models.Model):
 class RevisionAttachment(models.Model):
     upload = models.FileField(upload_to=drawing_upload_path,
                               blank=True) # default='settings.BASE_DIR/pdfs/file.pdf')
-    revision = models.ForeignKey(Revision, on_delete=models.SET_NULL,
+    link = models.ForeignKey(Revision, on_delete=models.SET_NULL,
                                 blank=True, null=True)
     mod_by = models.ForeignKey(User, on_delete=models.SET_NULL,
                                 blank=True, null=True)
     add_date = models.DateTimeField(auto_now=True)
     mod_date = models.DateTimeField(auto_now=True, null=True)
+    file_cat = models.CharField(max_length=15, default='revision')
 
     def filename(self, filepath=None):
         if not filepath:
@@ -245,12 +244,13 @@ class Comment(models.Model):
 class CommentAttachment(models.Model):
     upload = models.FileField(upload_to=drawing_upload_path,
                               blank=True) # default='settings.BASE_DIR/pdfs/file.pdf')
-    comment = models.ForeignKey(Comment, on_delete=models.SET_NULL,
+    link = models.ForeignKey(Comment, on_delete=models.SET_NULL,
                                 blank=True, null=True)
     mod_by = models.ForeignKey(User, on_delete=models.SET_NULL,
                                 blank=True, null=True)
     add_date = models.DateTimeField(auto_now=True)
     mod_date = models.DateTimeField(auto_now=True, null=True)
+    file_cat = models.CharField(max_length=15, default='comment')
 
     def filename(self, filepath=None):
         if not filepath:
@@ -296,12 +296,13 @@ class Reply(models.Model):
 class ReplyAttachment(models.Model):
     upload = models.FileField(upload_to=drawing_upload_path,
                               blank=True) # default='settings.BASE_DIR/pdfs/file.pdf')
-    reply = models.ForeignKey(Reply, on_delete=models.SET_NULL,
+    link = models.ForeignKey(Reply, on_delete=models.SET_NULL,
                                 blank=True, null=True)
     mod_by = models.ForeignKey(User, on_delete=models.SET_NULL,
                                 blank=True, null=True)
     add_date = models.DateTimeField(auto_now=True)
     mod_date = models.DateTimeField(auto_now=True, null=True)
+    file_cat = models.CharField(max_length=15, default='reply')
 
     def filename(self, filepath=None):
         if not filepath:
