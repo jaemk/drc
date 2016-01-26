@@ -4,15 +4,15 @@
     <tr><th> Description </th>  <td> {{ drawing.desc.title }} </td></tr>
     <tr><th> Phase       </th>  <td> {{ drawing.phase.number }} </td></tr>
     <tr><th> Received    </th>  <td> {{ drawing.received }} </td></tr>
-    <tr><th> Project     </th>  <td> {{ drawing.project.name }} </td></tr> 
+    <tr><th> Project     </th>  <td> {{ drawing.project.name.upper }} </td></tr> 
     <tr><th> Blocks       </th>  <td> {% for block in drawing.block %}
-                                        {{block.name }}, 
+                                        {{block.name.upper }}, 
                                      {% endfor %} </td></tr> 
     {% if drawing.received %}
     <tr><th> Status      </th>  <td> {{ drawing.status.status }} </td></tr>
     
     {% else %}
-    <tr><th> Expected    </th>  <td> {{drawing.expected.month}}-{{drawing.expected.day}}-{{drawing.expected.year}} </td></tr>
+    <tr><th> Expected    </th>  <td> {{drawing.expected|date:"m-d-Y"}} </td></tr>
     {% endif %}
     
     <tr><th> Department  </th>  <td> {{ drawing.department.name }} </td></tr>

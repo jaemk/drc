@@ -156,27 +156,56 @@ def drawing_detail(request, drawing_name):
     return render(request, 'tracking/drawing_detail.html', context)
 
 
+def _update_drawing_info(drawing_name, post_info): 
+    info = {}
+    for key, val in post_info.items():
+        if val:
+            if key in ['name', 'desc']:
+                val = val.replace(' ','-')
+                info[key] = val.lower()
+            elif key in ['received']:
+                choice = {'yes':True, 'no':False}
+                info[key] = choice[val]
+            elif key in ['block']:
+                dwg = Drawing.objects.get(name=drawing_name)
+                dwg.block.clear()
+                for block in val:
+                    dwg.block.add(block)
+                dwg.save()
+            else:
+                info[key] = val
+    if info:
+        Drawing.objects.filter(name=drawing_name).update(**info)
+        newname = None
+        if 'name' in info:
+            newname = info['name']
+        return newname, True
+    return None, None
+
+
 @login_required
 def drawing_edit(request, drawing_name):
     ''' Serve form to edit drawing info or add attachments '''
     username = _get_username(request)
+    error = None
     if request.method == 'POST':
         edit_form = DrawingAddForm(True, request.POST)
-        print(edit_form.errors)
+        # print(edit_form.errors)
         if edit_form.is_valid():
             if request.POST:
-                #post_info = 
-                return httpresp('{} - {}'.format(request.POST['name'], request.POST['received']))
-                
-            return httprespred(reverse('tracking:drawing_detail', args=[drawing_name]))
-        # else:
-        #     return httpresp( 'Form was not valid.')     
+                post_info = edit_form.cleaned_data
+                new_drawing, check = _update_drawing_info(drawing_name, post_info)
+                if new_drawing:
+                    drawing_name = new_drawing
+                if not check:
+                    error = 'No changes detected'
+    
     else:
         edit_form = DrawingAddForm(edit=True)
 
     detail = _get_drawing_detail(drawing_name)
     drawing_det = detail['drawing']
-    context = {'drawing':drawing_det, 'form':edit_form, 'is_edit':True}
+    context = {'drawing':drawing_det, 'form':edit_form, 'is_edit':True, 'error':error}
     return render(request, 'tracking/drawing_add.html', context)
 
 

@@ -3,7 +3,8 @@
 {% block content %}
 
 <h3> {{ drawing.name.upper }} </h3>
-<a href="javascript:history.go(-1);">Return to results</a>
+<a href="{% url 'tracking:drawing_search' %}">Return to Drawing Search</a>
+<!-- <a href="javascript:history.go(-1);">Return to results</a> -->
 <br/>
 
 <table class="info-table">

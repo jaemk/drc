@@ -19,10 +19,12 @@ class ReplyAutoIncrementTestCase(TestCase):
         user = User.objects.get(username='tester')
         com = Comment.objects.first()
         newrep = Reply(desc = 'test reply', text='thisis reply text',
-                       comment=com, owner=user)
+                comment=com, owner=user, number=com.number_replies()+1)
         newrep.save()
         self.assertEqual(newrep.number, 1)
         newrep2 = Reply(desc = 'test reply2', text='thisis reply text2',
-               comment=com, owner=user)
+               comment=com, owner=user, number=com.number_replies()+1)
         newrep.save()
         self.assertEqual(newrep2.number, 2)
+        reply1 = Reply.objects.get(desc='test reply')
+        self.assertEqual(reply1.number, 1)
