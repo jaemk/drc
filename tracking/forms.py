@@ -1,4 +1,5 @@
 from django import forms
+# from django.contrib.admin.widgets import AdminDateWidget
 from .models import Project
 from .models import Phase
 from .models import Block
@@ -50,6 +51,9 @@ class DrawingAddForm(forms.Form):
                                                         to select multiple</small>''')
     status = forms.ModelChoiceField(queryset=DrawingStatus.objects.all(),
                                     to_field_name='status', required=False)
+    expected = forms.DateField(widget=forms.SelectDateWidget(
+                                            empty_label=('Year', 'Month', 'Day')),
+                                            required=False)
     department = forms.ModelChoiceField(queryset=Department.objects.all(),
                                         to_field_name='name', required=False)
     discipline = forms.ModelChoiceField(queryset=Discipline.objects.all(),
@@ -61,6 +65,21 @@ class DrawingAddForm(forms.Form):
         super(DrawingAddForm, self).__init__(*args, **kwargs)
         if edit:
             self.fields['name'].required = False
+
+
+class RevisionAddForm(forms.Form):
+    number = forms.CharField(max_length=100, required=True)
+    desc = forms.CharField(max_length=500, required=False)
+    drawing = forms.ModelChoiceField(queryset=Drawing.objects.all(),
+                                     to_field_name='name', required=True)
+    add_date = forms.DateField(widget=forms.SelectDateWidget(
+                                            empty_label=('Year', 'Month', 'Day')),
+                                            required=False)
+    
+    def __init__(self, drawing_name=None, *args, **kwargs):
+        super(RevisionAddForm, self).__init__(*args, **kwargs)
+        if drawing_name:
+            self.fields['drawing'].queryset = Drawing.objects.get(name=drawing_name)
 
 
 class FileForm(forms.Form):

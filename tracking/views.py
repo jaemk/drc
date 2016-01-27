@@ -13,6 +13,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
 
 from django.conf import settings
+from django.utils import timezone
 
 from .models import Block
 from .models import DrawingStatus
@@ -62,48 +63,58 @@ def index(request):
     return render(request, 'tracking/index.html', {'username':user})
 
 
-### Drawing Search ###
+
 def _pull_drawings(formdat):
     ''' Replace wildcards '*' with regex '.*'
-        filter drawing names with optional qualifiers '''
+        filter drawing names with optional qualifiers 
+        return a drawing query set '''
+    
     if not formdat['drawing_name']:
         return None
-    # apply other qualifiers
-    # start with simplest first, saving refex
-    # search for last - return as soon as null
+    # Apply drawing search qualifiers:
+    #   start with simplest first, saving regex
+    #   search for last - return as soon as null
+
     cquery = None
+    # Fetch all comments that match selected comment status
     if formdat['comment_status']:
-        com_stat = formdat['comment_status']
-        if len(com_stat) > 1: # user selected both options
+        com_stat = formdat['comment_status'] # list of selections
+        if len(com_stat) > 1:   # user selected both options
             cquery = Comment.objects.prefetch_related('revision').all()
-        else: # user selected one option
+        else:                   # user selected one option
             check = {'open':True, 'closed':False}
             cquery = Comment.objects.prefetch_related('revision')\
                                     .filter(status=check[com_stat[0]])
         if not cquery.exists():
+            # there are no comments (so no drawings)
+            # that match the selected status
             return
 
+    # Create a Drawing query set
     if cquery:
+        # If there is a comment set, use it to filter drawings
         revs = Revision.objects.prefetch_related('drawing')\
                         .filter(pk__in=cquery.values_list('revision', flat=True))
         dquery = Drawing.objects.filter(pk__in=revs.values_list('drawing', flat=True))
-
     else:
         dquery = Drawing.objects
 
+    # Filter drawings based on Department name
     if formdat['department_name']:
         exp = formdat['department_name'].strip().lower().replace('*','.*')
         dquery = dquery.filter(department__name__regex=exp)
 
+    # Filter drawings based on Block name
     if formdat['block_name']:
         exp = formdat['block_name'].strip().lower().replace('*','.*')
         blockquery = Block.objects.filter(name__regex=exp)
         dquery = dquery.filter(block__in=blockquery)
 
+    # Filter drawings based on drawing status
     if formdat['drawing_status']:
         dquery = dquery.filter(status__status=formdat['drawing_status'])
 
-
+    # Filter drawing set based on drawing name regex
     qstr = '^{}$'.format(formdat['drawing_name'].replace('*','.*'))
     dquery = dquery.filter(name__regex=qstr).order_by('name')
     return dquery
@@ -162,9 +173,9 @@ def drawing_detail(request, drawing_name):
     return render(request, 'tracking/drawing_detail.html', context)
 
 
-def _update_drawing_info(drawing_name, post_info): 
+def _update_drawing_info(drawing_name, post_info, user): 
     info = {}
-    error = None
+    error = ''
     for key, val in post_info.items():
         if val:
             if key in ['name']:
@@ -190,11 +201,14 @@ def _update_drawing_info(drawing_name, post_info):
             else:
                 info[key] = val
     if info and not error:
+        info['mod_date'] = timezone.now()
+        info['mod_by'] = user
         Drawing.objects.filter(name=drawing_name).update(**info)
         newname = None
         if 'name' in info:
             newname = info['name']
         return newname, error
+
     return None, error
 
 
@@ -209,11 +223,9 @@ def drawing_edit(request, drawing_name):
         if edit_form.is_valid():
             if request.POST:
                 post_info = edit_form.cleaned_data
-                new_drawing, error = _update_drawing_info(drawing_name, post_info)
+                new_drawing, error = _update_drawing_info(drawing_name, post_info, user)
                 if new_drawing:
                     drawing_name = new_drawing
-                # if not check:
-                #     error = 'No changes detected'
     
     else:
         edit_form = DrawingAddForm(edit=True)
@@ -224,7 +236,9 @@ def drawing_edit(request, drawing_name):
     return render(request, 'tracking/drawing_add.html', context)
 
 
-def _add_new_drawing(request, post_info):
+def _add_new_drawing(request, post_info, user):
+    ''' check form data against name regex's 
+        create and save new drawing '''
     error = None
     new_drawing = {}
     for key, val in post_info.items():
@@ -246,6 +260,8 @@ def _add_new_drawing(request, post_info):
     name = None
     resp = None
     if not error:
+        new_drawing['mod_date'] = timezone.now()
+        new_drawing['mod_by'] = user
         drawing = Drawing(**new_drawing)
         drawing.save()
         if 'block' in post_info:
@@ -268,7 +284,7 @@ def drawing_add(request):
             if request.POST:
                 post_info = add_form.cleaned_data
                 # print(post_info)
-                resp, error = _add_new_drawing(request, post_info)
+                resp, error = _add_new_drawing(request, post_info, user)
                 if not error:
                     return resp
    
@@ -281,14 +297,35 @@ def drawing_add(request):
 
 @login_required
 def drawing_revision_add(request, drawing_name):
-    pass
+    ''' Serve form to add new revision to drawing '''
+    user = _get_user(request)
+    error = None
+    # if request.method == 'POST':
+    #     add_form = DrawingAddForm(False, request.POST)
+    #     if add_form.is_valid():
+    #         # print('valid')
+    #         if request.POST:
+    #             post_info = add_form.cleaned_data
+    #             # print(post_info)
+    #             resp, error = _add_new_drawing(request, post_info)
+    #             if not error:
+    #                 return resp
+   
+    # else:
+    add_form = DrawingAddForm(edit=False)
+
+    context = {'form':add_form, 'is_edit':False, 'error':error}
+    return render(request, 'tracking/drawing_add.html', context)
+    # only serve form with current drawing info already filled
+    # form should redirect to tracking:revision_add
+    return httpresp('drawing revision add page')
 
 @login_required
 def revision_add(request):
     pass
 
 @login_required
-def drawing_revision_edit(request, drawing_name, rev_no):
+def revision_edit(request, drawing_name, rev_no):
     pass
 
 @login_required

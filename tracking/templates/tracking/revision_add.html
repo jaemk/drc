@@ -26,22 +26,25 @@ Error: {{ error }}
 {% endif %}
 
 {% if is_edit %}
-<form action="{% url 'tracking:drawing_revision_edit' drawing_name=revision.drawing.name rev_no=revision.number %}" method="Post" enctype="multipart/form-data">
+    <form action="{% url 'tracking:revision_edit' drawing_name=revision.drawing.name rev_no=revision.number %}" method="Post" enctype="multipart/form-data">
 {% else %}
-<form action="{% url 'tracking:drawing_add' %}" method="Post" enctype="multipart/form-data">
+    <form action="{% url 'tracking:revision_add' %}" method="Post" enctype="multipart/form-data">
 {% endif %}
 
     {% csrf_token %}
     {{ form.errors }}
 {{ form.non_field_errors }}
         <table class="search-table">
-            <caption> New Info: Any fields you fill here will overwrite the current. </caption>
+            <caption> 
+                {% if is_edit %} New Info: Any fields you fill here will overwrite the current.
+                {% else %} New Revision Info 
+                {% endif %} </caption>
         {{ form.as_table }}
         </table>
     {% if is_edit %}
     <p><input type="submit" value="Submit Changes & Overwrite Existing"/></p>
     {% else %}
-    <p><input type="submit" value="Submit Drawing Info"/></p>
+    <p><input type="submit" value="Submit New Revision Info"/></p>
     {% endif %}
 </form>
 

@@ -19,9 +19,9 @@ urlpatterns = [
         views.revision_detail, name='revision_detail'),
     url(r'^drawing/(?P<drawing_name>[a-zA-Z0-9_-]+)/add/rev/$',
         views.drawing_revision_add, name='drawing_revision_add'),
-    url(r'^drawing/(?P<drawing_name>[a-zA-Z0-9_-]+)/edit/rev/(?P<rev_no>[a-z-A-Z0-9_\.-]+)/$',
-        views.drawing_revision_edit, name='drawing_revision_edit'),
     url(r'^add/revision/$', views.revision_add, name='revision_add'),
+    url(r'^drawing/(?P<drawing_name>[a-zA-Z0-9_-]+)/edit/rev/(?P<rev_no>[a-z-A-Z0-9_\.-]+)/$',
+        views.revision_edit, name='revision_edit'),
 
     url(r'^comment/(?P<com_id>[0-9_]+)/$',
         views.comment_detail, name='comment_detail'),
