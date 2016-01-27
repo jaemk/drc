@@ -53,8 +53,7 @@ class DrawingAddForm(forms.Form):
                                     to_field_name='status', required=False)
     expected = forms.DateField(widget=forms.SelectDateWidget(
                                             empty_label=('Year', 'Month', 'Day')),
-                                            required=False,
-                                            help_text='''<small>defaults to today</small>''')
+                                            required=False)
     department = forms.ModelChoiceField(queryset=Department.objects.all(),
                                         to_field_name='name', required=False)
     discipline = forms.ModelChoiceField(queryset=Discipline.objects.all(),
