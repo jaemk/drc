@@ -31,9 +31,14 @@ urlpatterns = [
     url(r'^drawing/(?P<drawing_name>[a-zA-Z0-9_-]+)/edit/rev/(?P<rev_no>[a-z-A-Z0-9_\.-]+)/$',
         views.revision_edit, name='revision_edit'),
 
-    # Comment (detail)
+    # Comment (detail, add)
     url(r'^comment/(?P<com_id>[0-9_]+)/$',
         views.comment_detail, name='comment_detail'),
+    url(r'^add/comment/on/(?P<drawing_name>[a-zA-Z0-9_-]+)/$',
+        views.drawing_comment_add, name='drawing_comment_add'),
+    url(r'^add/comment/on/(?P<drawing_name>[a-zA-Z0-9_-]+)/(?P<rev_no>[a-z-A-Z0-9_\.-]+)/$',
+        views.revision_comment_add, name='revision_comment_add'),
+    url(r'^add/comment/$', views.comment_add, name='comment_add'),
 
     # Reply (detail)
     url(r'^comment/(?P<com_id>[0-9_]+)/reply/(?P<rep_id>[0-9_]+)/$',

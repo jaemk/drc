@@ -1,0 +1,19 @@
+{% block content %}
+
+<col width="50">
+<col width="75">
+<col width="120">
+<col width="120">
+<col width="200">
+<tr><th> ID </th><th> Status </th><th> Date </th><th> Owner </th><th> Description </th><th>No. Replies</th></tr>
+{% if comments %}
+    {% for com in comments %}
+    <tr><td><a href="{% url 'tracking:comment_detail' com_id=com.id %}">{{ com.id }} </a></td><td>{{ com.open_closed }}</td><td>{{com.add_date|date:"m-d-Y"}}</td><td>{{ com.owner }}</td><td>{{ com.desc }}</td><td>{{ com.number_replies }}</tr>
+    {% endfor %}
+
+{% else %}
+<tr><td colspan="6" style="text-align:center"><strong> No Comments </strong></td></tr>
+
+{% endif %}
+
+{% endblock %}

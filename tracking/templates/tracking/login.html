@@ -2,6 +2,13 @@
 
 {% block content %}
 <table id='login-table'>
+    <caption>
+    {% if form.errors %}
+    Wrong Username/Password combo
+    {% else %}
+    Login to DRC
+    {% endif %}
+    </caption>
     <tr>
         <td>
 

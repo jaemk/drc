@@ -3,7 +3,7 @@
 {% block content %}
 
 {% if revision %}
-    <h3> {{ revision.number.upper }} </h3>
+    <h3> Revision: {{ revision.number.upper }} on {{ revision.drawing.name.upper }}</h3>
 <!-- <a href="javascript:history.go(-1);">Return to prev</a> -->
     <a href="{% url 'tracking:revision_detail' drawing_name=revision.drawing.name rev_no=revision.number %}">Return to Revision</a>
 {% else %}

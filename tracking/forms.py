@@ -77,10 +77,14 @@ class RevisionAddForm(forms.Form):
                                             required=False,
                                             help_text='''<small>defaults to today</small>''')
     
-    def __init__(self, drawing_name=None, *args, **kwargs):
+    def __init__(self, drawing_name=None, edit=False, *args, **kwargs):
         super(RevisionAddForm, self).__init__(*args, **kwargs)
         if drawing_name:
             self.fields['drawing'].queryset = Drawing.objects.filter(name=drawing_name)
+        if edit:
+            self.fields['number'].required = False
+            del self.fields['drawing']
+            del self.fields['add_date']
 
 
 class FileForm(forms.Form):
@@ -113,8 +117,6 @@ class RemoveFileForm(forms.Form):
                                        queryset=queryset,
                                        label='Select files to remove',
                                        help_text='<small>select multiple to delete</small>')
-                                       # choices=(('backend', 'Shown'),
-                                       #          ('backend', 'Shown')))
 
 
 

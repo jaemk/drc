@@ -1,5 +1,5 @@
 {% block content %}
-    <tr><th> No. </th><td> {{ revision.number }} </td></tr>
-    <tr><th> Date </th><td> {{ revision.date }} </td></tr>
-    <tr><th> Description </th><td> {{ revision.desc }} </td></tr>
+    <tr><th> No. </th><td> {{ revision.number.upper }} </td></tr>
+    <tr><th> Date </th><td> {{ revision.add_date|date:"m-d-Y" }} </td></tr>
+    <tr><th> Description </th><td> {{ revision.desc.capitalize }} </td></tr>
 {% endblock %}

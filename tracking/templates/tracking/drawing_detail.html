@@ -38,7 +38,7 @@
     <tr><th> No. </th><th> Date </th><th> Description </th> </tr>
     {% if revisions %}
         {% for rev in revisions %}
-        <tr><td><a href="{% url 'tracking:revision_detail' drawing_name=drawing.name rev_no=rev.number %}">{{ rev.number }} </a></td><td>{{rev.date.month}}-{{rev.date.day}}-{{rev.date.year}}</td><td>{{ rev.desc }}</td></tr>
+        <tr><td><a href="{% url 'tracking:revision_detail' drawing_name=drawing.name rev_no=rev.number %}">{{ rev.number }} </a></td><td>{{rev.add_date|date:"m-d-Y"}}</td><td>{{ rev.desc.capitalize }}</td></tr>
         {% endfor %}
     {% else %}
     <tr><td colspan="3" style="text-align:center"><strong> No Revisions </strong></td></tr>
@@ -50,21 +50,9 @@
 <div style="clear:both;"></div>
 
 <table class="info-table rev-table">
-<col width="50">
-<col width="75">
-<col width="120">
-<col width="200">
-<caption><strong> -- Comments -- </strong></caption>
-<tr><th> ID </th><th> Status </th><th> Date </th><th> Owner </th><th> No. Replies</th></tr>
-{% if comments %}
-    {% for com in comments %}
-    <tr><td><a href="{% url 'tracking:comment_detail' com_id=com.id %}">{{ com.id }} </a></td><td>{{ com.open_closed }}</td><td>{{com.add_date|date:"m-d-Y"}}</td><td>{{ com.owner }}</td><td>{{ com.number_replies }}</tr>
-    {% endfor %}
+<caption><strong> -- Comments <a href="{% url 'tracking:drawing_comment_add' drawing_name=drawing.name %}"><small> Add </small></a> -- </strong></caption>
+{% include 'tracking/comment_list_table.html' %}
 
-{% else %}
-<tr><td colspan="4" style="text-align:center"><strong> No Comments </strong></td></tr>
-
-{% endif %}
 </table>
 
 

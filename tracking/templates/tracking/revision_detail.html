@@ -8,7 +8,7 @@
     <col width="100">
     <col width="120">
     <col width="300">
-    <caption><strong> -- Revision Info #edit# -- </strong></caption>
+    <caption><strong> -- Revision Info <a href="{% url 'tracking:revision_edit' drawing_name=revision.drawing.name rev_no=revision.number %}"><small> Edit </small></a> -- </strong></caption>
     {% include 'tracking/revision_info_table.html' %}
 
     <tr><th> Attachments <a href="{% url 'tracking:add_attachment' item_type='revision' item_id=revision.id %} "><small> Add </a>|<a href="{% url 'tracking:remove_attachment' item_type='revision' item_id=revision.id %}"> Remove </small></a></th><td>  
@@ -29,21 +29,10 @@
 <div style="clear:both;"></div>
 
 <table class="info-table rev-table">
-<col width="50">
-<col width="75">
-<col width="120">
-<col width="200">
-<caption><strong> -- Comments #add# -- </strong></caption>
-<tr><th> ID </th><th> Status </th><th> Date </th><th> Owner </th><th> Description </th><th>No. Replies</th></tr>
-{% if comments %}
-    {% for com in comments %}
-    <tr><td><a href="{% url 'tracking:comment_detail' com_id=com.id %}">{{ com.id }} </a></td><td>{{ com.open_closed }}</td><td>{{com.date.month}}-{{com.date.day}}-{{com.date.year}}</td><td>{{ com.owner }}</td><td>{{ com.desc }}</td><td>{{ com.number_replies }}</tr>
-    {% endfor %}
+<caption><strong> -- Comments <a href="{% url 'tracking:revision_comment_add' drawing_name=revision.drawing.name rev_no=revision.number %}"><small> Add </small></a> -- </strong></caption>
+{% include 'tracking/comment_list_table.html' %}
 
-{% else %}
-<tr><td colspan="6" style="text-align:center"><strong> No Comments </strong></td></tr>
 
-{% endif %}
 </table>
 
 {% endblock %}
