@@ -29,7 +29,7 @@
 <div style="clear:both;"></div>
 
 <table class="info-table rev-table">
-<caption><strong> -- Comments <a href="{% url 'tracking:revision_comment_add' drawing_name=revision.drawing.name rev_no=revision.number %}"><small> Add </small></a> -- </strong></caption>
+<caption><strong> -- Comments <a href="{% url 'tracking:drawing_comment_add' drawing_name=revision.drawing.name %}"><small> Add </small></a> -- </strong></caption>
 {% include 'tracking/comment_list_table.html' %}
 
 

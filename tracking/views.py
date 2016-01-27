@@ -512,10 +512,6 @@ def reply_detail(request, com_id, rep_id):
 
 
 #----------------------  Comment Add ------------------------
-@login_required
-def revision_comment_add(request, drawing_name, rev_no):
-    return httpresp(''' add new comment on {}-{}'''.format(drawing_name, rev_no))
-
 
 @login_required
 def drawing_comment_add(request, drawing_name):

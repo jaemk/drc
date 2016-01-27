@@ -36,8 +36,6 @@ urlpatterns = [
         views.comment_detail, name='comment_detail'),
     url(r'^add/comment/on/(?P<drawing_name>[a-zA-Z0-9_-]+)/$',
         views.drawing_comment_add, name='drawing_comment_add'),
-    url(r'^add/comment/on/(?P<drawing_name>[a-zA-Z0-9_-]+)/(?P<rev_no>[a-z-A-Z0-9_\.-]+)/$',
-        views.revision_comment_add, name='revision_comment_add'),
     url(r'^add/comment/$', views.comment_add, name='comment_add'),
 
     # Reply (detail)

@@ -5,7 +5,7 @@
 <h3> {{ drawing.name.upper }} </h3>
 <a href="{% url 'tracking:drawing_search' %}">Return to Drawing Search</a>
 <!-- <a href="javascript:history.go(-1);">Return to results</a> -->
-<br/>
+
 
 <table class="info-table">
     <col width=120>
@@ -46,8 +46,8 @@
 
 </table>
 
-</br>
-<div style="clear:both;"></div>
+<!-- </br> -->
+<!-- <div style="clear:both;"></div> -->
 
 <table class="info-table rev-table">
 <caption><strong> -- Comments <a href="{% url 'tracking:drawing_comment_add' drawing_name=drawing.name %}"><small> Add </small></a> -- </strong></caption>
@@ -55,5 +55,5 @@
 
 </table>
 
-
+<!-- <div style="clear:both;"></div> -->
 {% endblock %}

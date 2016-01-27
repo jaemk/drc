@@ -10,7 +10,7 @@
     </head>
     <body>
 
-        <div class="header">
+        <div id="header">
             <div>
                 <h1 style="margin-left:10px;"><a href="/tracking/">  DRC </a></h1>
             </div>
@@ -36,11 +36,15 @@
             </div>
         </div>
 
-        <div>
+        <div id="content">
             {% block content %}
             {% endblock %}
         </div>
-        <div style="margin-bottom:20px;">
-        </div>
+
+      <!--   <div id="footer">
+            <div class="box">
+                footer
+            </div>
+        </div> -->
     </body>
 </html>
