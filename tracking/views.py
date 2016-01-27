@@ -31,6 +31,7 @@ from .forms import SearchForm
 from .forms import FileForm
 from .forms import DrawingAddForm
 from .forms import RemoveFileForm
+from .forms import RevisionAddForm
 
 
 DWG_TEST = re.compile('^([a-zA-Z0-9_-]+)$')
@@ -180,8 +181,8 @@ def _update_drawing_info(drawing_name, post_info, user):
         if val:
             if key in ['name']:
                 val = val.strip().replace(' ','-').lower()
-                if not REV_TEST.match(val):
-                    error = 'Invalid character(s). Please use alphanumeric and "_", "-", "."'
+                if not DWG_TEST.match(val):
+                    error = 'Invalid character(s). Please use alphanumeric and "_ -"'
                     break
                 if Drawing.objects.filter(name=val).exists():
                     error = 'Drawing already exists...'
@@ -232,7 +233,8 @@ def drawing_edit(request, drawing_name):
 
     detail = _get_drawing_detail(drawing_name)
     drawing_det = detail['drawing']
-    context = {'drawing':drawing_det, 'form':edit_form, 'is_edit':True, 'error':error}
+    context = {'drawing':drawing_det, 'form':edit_form, 
+               'is_edit':True, 'error':error, 'username':user}
     return render(request, 'tracking/drawing_add.html', context)
 
 
@@ -254,12 +256,15 @@ def _add_new_drawing(request, post_info, user):
                 break
         elif key == 'desc':
             new_drawing[key] = val.lower()
+        elif key == 'received':
+            choice = {'yes':True, 'no':False}
+            new_drawing[key] = choice[val]
         else:
             new_drawing[key] = val
 
-    name = None
     resp = None
     if not error:
+        new_drawing['add_date'] = timezone.now()
         new_drawing['mod_date'] = timezone.now()
         new_drawing['mod_by'] = user
         drawing = Drawing(**new_drawing)
@@ -272,6 +277,7 @@ def _add_new_drawing(request, post_info, user):
                                    args=[drawing.name]))
     return resp, error
 
+
 @login_required
 def drawing_add(request):
     ''' Serve form to add drawing info '''
@@ -280,49 +286,93 @@ def drawing_add(request):
     if request.method == 'POST':
         add_form = DrawingAddForm(False, request.POST)
         if add_form.is_valid():
-            # print('valid')
-            if request.POST:
-                post_info = add_form.cleaned_data
-                # print(post_info)
-                resp, error = _add_new_drawing(request, post_info, user)
-                if not error:
-                    return resp
+            post_info = add_form.cleaned_data
+            # print(post_info)
+            resp, error = _add_new_drawing(request, post_info, user)
+            if not error:
+                return resp
    
     else:
         add_form = DrawingAddForm(edit=False)
 
-    context = {'form':add_form, 'is_edit':False, 'error':error}
+    context = {'form':add_form, 'is_edit':False, 
+               'error':error, 'username':user}
     return render(request, 'tracking/drawing_add.html', context)
 
 
 @login_required
 def drawing_revision_add(request, drawing_name):
-    ''' Serve form to add new revision to drawing '''
+    ''' Serve add revision form with current drawing 
+        info already filled out. Form should redirect 
+        to 'tracking:revision_add' for processing '''
     user = _get_user(request)
     error = None
-    # if request.method == 'POST':
-    #     add_form = DrawingAddForm(False, request.POST)
-    #     if add_form.is_valid():
-    #         # print('valid')
-    #         if request.POST:
-    #             post_info = add_form.cleaned_data
-    #             # print(post_info)
-    #             resp, error = _add_new_drawing(request, post_info)
-    #             if not error:
-    #                 return resp
-   
-    # else:
-    add_form = DrawingAddForm(edit=False)
 
-    context = {'form':add_form, 'is_edit':False, 'error':error}
-    return render(request, 'tracking/drawing_add.html', context)
-    # only serve form with current drawing info already filled
-    # form should redirect to tracking:revision_add
-    return httpresp('drawing revision add page')
+    add_form = RevisionAddForm(drawing_name=drawing_name)
+    drawing = Drawing.objects.get(name=drawing_name)
+    context = {'form':add_form, 'drawing':drawing, 'is_edit':False, 
+               'error':error, 'username':user}
+    return render(request, 'tracking/revision_add.html', context)
+
+
+def _add_new_revision(request, post_info, user):
+    ''' check form data against name regex's 
+        create and save new drawing '''
+    error = None
+    new_rev = {}
+    for key, val in post_info.items():
+        if not val:
+            continue
+        if key == 'number':
+            new_rev[key] = val.strip().replace(' ','-').lower()
+            if not REV_TEST.match(new_rev[key]):
+                error = 'Invalid character(s). Please use alphanumeric and \'_, -\''
+                break
+            if Revision.objects.filter(number=new_rev[key],
+                                       drawing=post_info['drawing']).exists():
+                error = 'Drawing already exists...'
+                break
+        elif key == 'desc':
+            new_rev[key] = val.lower()
+        elif key == 'add_date':
+            if not val:
+                new_rev[key] = timezone.now()
+            else:
+                new_rev[key] = val
+        else:
+            new_rev[key] = val
+
+    resp = None
+    if not error:
+        new_rev['mod_date'] = timezone.now()
+        new_rev['mod_by'] = user
+        revision = Revision(**new_rev)
+        revision.save()
+        resp = httprespred(reverse('tracking:revision_detail',
+                                   args=[revision.drawing.name,
+                                         revision.number]))
+    return resp, error
+
 
 @login_required
 def revision_add(request):
-    pass
+    user = _get_user(request)
+    error = None
+    if request.method == 'POST':
+        add_form = RevisionAddForm(None, request.POST)
+        if add_form.is_valid():
+            post_info = add_form.cleaned_data
+            # print(post_info)
+            resp, error = _add_new_revision(request, post_info, user)
+            if not error:
+                return resp
+    else:
+        add_form = RevisionAddForm(drawing_name=None)
+
+    context = {'form':add_form, 'drawing':None, 'is_edit':False, 
+               'error':error, 'username':user}
+    return render(request, 'tracking/revision_add.html', context)
+
 
 @login_required
 def revision_edit(request, drawing_name, rev_no):
@@ -494,9 +544,10 @@ def serve_attachment(request, file_type, file_id):
 
 @login_required
 def open_comment_search(request):
+    user = _get_user(request)
     coms = Comment.objects.prefetch_related('revision')\
                          .filter(status=True)
-    context = {'comments':coms}
+    context = {'comments':coms, 'username':user}
     return render(request, 'tracking/open_comments.html', context)
 
 
