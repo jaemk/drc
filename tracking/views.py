@@ -1,4 +1,5 @@
 import os
+import re
 import mimetypes
 
 from django.shortcuts import render
@@ -29,6 +30,10 @@ from .forms import SearchForm
 from .forms import FileForm
 from .forms import DrawingAddForm
 from .forms import RemoveFileForm
+
+
+DWG_TEST = re.compile('^([a-zA-Z0-9_-]+)$')
+REV_TEST = re.compile('^([a-zA-Z0-9_\.-]+)$')
 
 
 def _get_user(request):
@@ -159,10 +164,19 @@ def drawing_detail(request, drawing_name):
 
 def _update_drawing_info(drawing_name, post_info): 
     info = {}
+    error = None
     for key, val in post_info.items():
         if val:
-            if key in ['name', 'desc']:
-                val = val.replace(' ','-')
+            if key in ['name']:
+                val = val.strip().replace(' ','-').lower()
+                if not REV_TEST.match(val):
+                    error = 'Invalid character(s). Please use alphanumeric and "_", "-", "."'
+                    break
+                if Drawing.objects.filter(name=val).exists():
+                    error = 'Drawing already exists...'
+                    break
+                info[key] = val
+            elif key in ['desc']:
                 info[key] = val.lower()
             elif key in ['received']:
                 choice = {'yes':True, 'no':False}
@@ -175,13 +189,13 @@ def _update_drawing_info(drawing_name, post_info):
                 dwg.save()
             else:
                 info[key] = val
-    if info:
+    if info and not error:
         Drawing.objects.filter(name=drawing_name).update(**info)
         newname = None
         if 'name' in info:
             newname = info['name']
-        return newname, True
-    return None, None
+        return newname, error
+    return None, error
 
 
 @login_required
@@ -195,11 +209,11 @@ def drawing_edit(request, drawing_name):
         if edit_form.is_valid():
             if request.POST:
                 post_info = edit_form.cleaned_data
-                new_drawing, check = _update_drawing_info(drawing_name, post_info)
+                new_drawing, error = _update_drawing_info(drawing_name, post_info)
                 if new_drawing:
                     drawing_name = new_drawing
-                if not check:
-                    error = 'No changes detected'
+                # if not check:
+                #     error = 'No changes detected'
     
     else:
         edit_form = DrawingAddForm(edit=True)
@@ -209,6 +223,38 @@ def drawing_edit(request, drawing_name):
     context = {'drawing':drawing_det, 'form':edit_form, 'is_edit':True, 'error':error}
     return render(request, 'tracking/drawing_add.html', context)
 
+
+def _add_new_drawing(request, post_info):
+    error = None
+    new_drawing = {}
+    for key, val in post_info.items():
+        if not val or key == 'block':
+            continue
+        if key == 'name':
+            new_drawing[key] = val.strip().replace(' ','-').lower()
+            if not DWG_TEST.match(new_drawing[key]):
+                error = 'Invalid character(s). Please use alphanumeric and \'_, -\''
+                break
+            if Drawing.objects.filter(name=new_drawing[key]).exists():
+                error = 'Drawing already exists...'
+                break
+        elif key == 'desc':
+            new_drawing[key] = val.lower()
+        else:
+            new_drawing[key] = val
+
+    name = None
+    resp = None
+    if not error:
+        drawing = Drawing(**new_drawing)
+        drawing.save()
+        if 'block' in post_info:
+            for block in post_info['block']:
+                drawing.block.add(block)
+            drawing.save()
+        resp = httprespred(reverse('tracking:drawing_detail',
+                                   args=[drawing.name]))
+    return resp, error
 
 @login_required
 def drawing_add(request):
@@ -222,18 +268,13 @@ def drawing_add(request):
             if request.POST:
                 post_info = add_form.cleaned_data
                 # print(post_info)
-                return httpresp('{}'.format(['{}:{}'.format(k,v) for k,v in post_info.items()]))
-                # new_drawing, check = _update_drawing_info(drawing_name, post_info)
-                # if new_drawing:
-                #     drawing_name = new_drawing
-                # if not check:
-                #     error = 'No changes detected'
-    
+                resp, error = _add_new_drawing(request, post_info)
+                if not error:
+                    return resp
+   
     else:
         add_form = DrawingAddForm(edit=False)
 
-    # detail = _get_drawing_detail(drawing_name)
-    # drawing_det = detail['drawing']
     context = {'form':add_form, 'is_edit':False, 'error':error}
     return render(request, 'tracking/drawing_add.html', context)
 
@@ -244,6 +285,10 @@ def drawing_revision_add(request, drawing_name):
 
 @login_required
 def revision_add(request):
+    pass
+
+@login_required
+def drawing_revision_edit(request, drawing_name, rev_no):
     pass
 
 @login_required

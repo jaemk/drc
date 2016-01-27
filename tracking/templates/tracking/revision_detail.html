@@ -9,9 +9,8 @@
     <col width="120">
     <col width="300">
     <caption><strong> -- Revision Info #edit# -- </strong></caption>
-    <tr><th> No. </th><td> {{ revision.number }} </td></tr>
-    <tr><th> Date </th><td> {{ revision.date }} </td></tr>
-    <tr><th> Description </th><td> {{ revision.desc }} </td></tr>
+    {% include 'tracking/revision_info_table.html' %}
+
     <tr><th> Attachments <a href="{% url 'tracking:add_attachment' item_type='revision' item_id=revision.id %} "><small> Add </a>|<a href="{% url 'tracking:remove_attachment' item_type='revision' item_id=revision.id %}"> Remove </small></a></th><td>  
     {% if attachments %}
     <ul>
