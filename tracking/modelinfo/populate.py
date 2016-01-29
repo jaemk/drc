@@ -30,6 +30,7 @@ def available():
         if os.path.isfile(os.path.join(location, f)):
             print('  -> {}'.format(f))
 
+
 def _pack_info(keys, info_raw):
     info = {}
     for line in info_raw:
@@ -40,6 +41,7 @@ def _pack_info(keys, info_raw):
             except KeyError:
                 info[key] = []
     return info
+
 
 def _parse_file(name=None, headers=True):
     if not name:
@@ -67,15 +69,17 @@ def add_blocks():
     keyval = block_file.split('.')[0]
     already = Block.objects.all()
     prev = [block.name for block in already]
-    added = prev[:]
-    print('->> Total already in: {}'.format(len(added)))
+    added = len(prev)
+    test = set(prev)
+    print('->> Total already in: {}'.format(added))
     for item in info[keyval]:
-        if item not in added:
+        if item not in test:
             new_block = Block(name=item)
             new_block.save()
-            added.append(item)
+            test.add(item)
+            added += 1
             print('  -> Added Block: {}'.format(item))
-    print('->> Total added: {}'.format(len(added) - len(prev)))
+    print('->> Total added: {}'.format(added - len(prev)))
 
 
 def add_drawing_statuses():
@@ -153,7 +157,6 @@ def find_phases():
         for item in phases:
             print(item)
             pfile.write('{}\n'.format(item))
-
 
 
 def add_phases():
