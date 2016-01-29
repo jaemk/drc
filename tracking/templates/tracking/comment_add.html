@@ -1,0 +1,58 @@
+{% extends 'tracking/base.html' %}
+
+{% block content %}
+
+{% if comment %}
+    <h3> Comment: {{ comment.id }} on {{ comment.revision.all }}</h3>
+<!-- <a href="javascript:history.go(-1);">Return to prev</a> -->
+    <a href="{% url 'tracking:comment_detail' com_id=comment.id %}">Return to Comment</a>
+{% else %}
+    <h3> Add New Comment 
+        {% if revision %}
+        on <a href="{% url 'tracking:revision_detail' drawing_name=revision.drawing.name rev_no=revision.number %}">{{revision.drawing.name.upper}}-{{revision.number}}</a>
+        {% endif %}
+    </h3>
+{% endif %}
+
+<br/>
+
+{% if is_edit %}
+    <table class="info-table">
+        <col width="120">
+        <col width="300">
+        <caption> Current Info: Will be overwritten </caption>
+        {% include 'tracking/revision_info_table.html' %}
+    </table> <!-- so tired -->
+{% endif %}
+
+{% if error %}
+    Error: {{ error }}
+{% endif %}
+
+{% if is_edit %}
+    <form action="{% url 'tracking:revision_edit' drawing_name=revision.drawing.name rev_no=revision.number %}" method="Post" enctype="multipart/form-data">
+{% else %}
+    <form action="{% url 'tracking:revision_add' %}" method="Post" enctype="multipart/form-data">
+{% endif %}
+
+    {% csrf_token %}
+    {{ form.errors }}
+    {{ form.non_field_errors }}
+    <table class="search-table">
+        <caption> 
+            {% if is_edit %} New Info: Any fields you fill here will overwrite the current.
+            {% else %} New Revision Info 
+            {% endif %} 
+        </caption>
+        {{ form.as_table }}
+    </table>
+    {% if is_edit %}
+        <p><input type="submit" value="Submit Changes & Overwrite Existing"/></p>
+    {% else %}
+        <p><input type="submit" value="Submit New Revision Info"/></p>
+    {% endif %}
+</form>
+
+
+{% endblock %}
+
