@@ -33,6 +33,7 @@ from .forms import DrawingAddForm
 from .forms import RemoveFileForm
 from .forms import RevisionAddForm
 
+from .tasks import test
 
 DWG_TEST = re.compile('^([a-zA-Z0-9_-]+)$')
 REV_TEST = re.compile('^([a-zA-Z0-9_\.-]+)$')
@@ -62,6 +63,8 @@ def logout_view(request):
 def index(request):
     ''' Homepage '''
     user = _get_user(request)
+    t = test.delay('words')
+    # print(t.get())
     return render(request, 'tracking/index.html', {'username':user})
 
 
