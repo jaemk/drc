@@ -1,4 +1,5 @@
 from ..models import Block
+from ..models import Phase
 from ..models import DrawingStatus
 from ..models import Department
 from ..models import Discipline
@@ -15,6 +16,7 @@ import pytz
 
 location = os.path.dirname(os.path.realpath(__file__))
 block_file = 'blocks.csv'
+phase_file = 'phases.csv'
 department_file = 'departments.csv'
 discipline_file = 'disciplines.csv'
 drawing_file = 'drawings.csv'
@@ -139,6 +141,42 @@ def add_drawing_kinds():
             print('  -> Added Dwg Kind: {}'.format(item))
     print('->> Total added: {}'.format(len(added) - len(prev)))
 
+def find_phases():
+    print('finding phases in drawings.csv')
+    info = _parse_file(name=drawing_file, headers=True)
+    phases = set()
+    for i in range(len(info[list(info.keys())[0]])):
+            ph = info['phase'][i].lower()
+            phases.add(ph)
+
+    with open(os.path.join(location, 'phases.csv'), 'w') as pfile:
+        for item in phases:
+            print(item)
+            pfile.write('{}\n'.format(item))
+
+
+
+def add_phases():
+    print('Looking for phase file')
+    if phase_file not in os.listdir(location):
+        print('phase file not found...')
+        find_phases()
+
+    print('Populating Phases...')
+    info = _parse_file(name=phase_file, headers=False)
+    keyval = phase_file.split('.')[0]
+    already = Phase.objects.all()
+    prev = [phase.number for phase in already]
+    added = prev[:]
+    print('->> Total already in: {}'.format(len(added)))
+    for item in info[keyval]:
+        if item not in added:
+            new_phase = Phase(number=item)
+            new_phase.save()
+            added.append(item)
+            print('  -> Added Phase: {}'.format(item))
+    print('->> Total added: {}'.format(len(added) - len(prev)))
+
 
 def add_drawings():
     info = _parse_file(name=drawing_file, headers=True)
@@ -150,7 +188,9 @@ def add_drawings():
     for i in range(total):
         name = info['name'][i].lower()
         if not Drawing.objects.filter(name=name).exists():
-            print(info['block'][i])
+            print('-> {}'.format(info['block'][i]), end='')
+            if info['block'][i] == '0':
+                info['block'][i] = 'misc'
             block = Block.objects.get(name=info['block'][i]) if info['block'][i] \
                                                              and info['block'][i] != '0'\
                                                              and info['block'][i] != 'none'\
@@ -159,15 +199,18 @@ def add_drawings():
             dep = Department.objects.get(name=info['department'][i]) if info['department'][i] else None
             disc = Discipline.objects.get(name=info['discipline'][i]) if info['discipline'][i] else None
             kind = DrawingKind.objects.get(name=info['kind'][i]) if info['kind'][i] else None
+            phase = Phase.objects.get(number=info['phase'][i]) if info['phase'][i] else None
             new_dwg = Drawing(name=name,
                               desc=info['desc'][i] if info['desc'][i] else None,
-                              phase=info['phase'][i] if info['phase'][i] else None,
-                              block=block,
+                              phase=phase,
+                              #block=block,
                               status=status,
                               department=dep,
                               discipline=disc,
                               kind=kind,
                               )
+            new_dwg.save()
+            new_dwg.block.add(block)
             new_dwg.save()
             added += 1
             print('  -> Added Drawing: {}'.format(name))
@@ -195,4 +238,5 @@ def add_expected_dates():
                 #update(expected=exp_date)
             print(' -> updated {} with date {}'.format(name, exp_date))
         
+
 
