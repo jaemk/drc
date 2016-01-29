@@ -8,8 +8,8 @@
     <a href="{% url 'tracking:comment_detail' com_id=comment.id %}">Return to Comment</a>
 {% else %}
     <h3> Add New Comment 
-        {% if revision %}
-        on <a href="{% url 'tracking:revision_detail' drawing_name=revision.drawing.name rev_no=revision.number %}">{{revision.drawing.name.upper}}-{{revision.number}}</a>
+        {% if drawing %}
+        on <a href="{% url 'tracking:drawing_detail' drawing_name=drawing.name %}">{{drawing.name.upper}}</a>
         {% endif %}
     </h3>
 {% endif %}
@@ -21,7 +21,14 @@
         <col width="120">
         <col width="300">
         <caption> Current Info: Will be overwritten </caption>
-        {% include 'tracking/revision_info_table.html' %}
+        <tr><th> Revision </th><td> {% if revisions %}
+                                    {% for rev in revisions %}
+                                        {{ rev.drawing.name.upper }}-{{ rev.number.upper }},
+                                    {% endfor %}
+                                    {% endif %}</td></tr>
+        <tr><th> Description </th><td> desc </td></tr>
+        <tr><th> Text </th></td> <td> Text </td></tr>
+        <tr><th> Status </th><td> open </td></td>
     </table> <!-- so tired -->
 {% endif %}
 
@@ -30,9 +37,9 @@
 {% endif %}
 
 {% if is_edit %}
-    <form action="{% url 'tracking:revision_edit' drawing_name=revision.drawing.name rev_no=revision.number %}" method="Post" enctype="multipart/form-data">
+    <form action="{% url 'tracking:comment_edit' com_id=comment.id %}" method="Post" enctype="multipart/form-data">
 {% else %}
-    <form action="{% url 'tracking:revision_add' %}" method="Post" enctype="multipart/form-data">
+    <form action="{% url 'tracking:comment_add' %}" method="Post" enctype="multipart/form-data">
 {% endif %}
 
     {% csrf_token %}

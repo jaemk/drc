@@ -32,6 +32,7 @@ from .forms import FileForm
 from .forms import DrawingAddForm
 from .forms import RemoveFileForm
 from .forms import RevisionAddForm
+from .forms import CommentAddForm 
 
 from .tasks import test
 
@@ -508,22 +509,56 @@ def comment_detail(request, com_id):
 
 
 
-@login_required
-def reply_detail(request, com_id, rep_id):
-
-    return httpresp('reply: {} on com: {}'.format(rep_id, com_id))
-
-
 #----------------------  Comment Add ------------------------
 
 @login_required
 def drawing_comment_add(request, drawing_name):
-    return httpresp(' add new comment on {}'.format(drawing_name))
+    user = _get_user(request) 
+    drawing = Drawing.objects.get(name=drawing_name)
+    revisions = Revision.objects.filter(drawing=drawing)
 
+    add_form = CommentAddForm(drawing_name=drawing_name, edit=False, check=False)
+    context = {'username':user, 'drawing':drawing,
+               'revisions':revisions, 'form':add_form}
+    return render(request, 'tracking/comment_add.html', context)
+    #return httpresp(' add new comment on {}'.format(drawing_name))
+
+
+def _add_new_comment(request, post_info, user):
+    return httpresp('{}'.format(post_info.items()))
 
 @login_required
 def comment_add(request):
-    return httpresp(''' add comment ''')
+    user = _get_user(request)
+    error = None
+    if request.method == 'POST':
+        add_form = CommentAddForm(None, False, True,  request.POST)
+        if add_form.is_valid():
+            post_info = add_form.cleaned_data
+            # print(post_info)
+            resp = _add_new_comment(request, post_info, user)
+            if not error:
+                return resp
+    else:
+        add_form = CommentAddForm(drawing_name='_', edit=False, check=False)
+
+    context = {'form':add_form, 'drawing':None, 'is_edit':False, 
+               'error':error, 'username':user}
+    return render(request, 'tracking/comment_add.html', context)
+
+    # return httpresp(''' add comment ''')
+
+
+@login_required
+def comment_edit(request, com_id):
+    return httpresp(''' edit comment ''')
+
+
+#---------------------  Reply Detail ------------------------
+@login_required
+def reply_detail(request, com_id, rep_id):
+
+    return httpresp('reply: {} on com: {}'.format(rep_id, com_id))
 
 
 #----------------------  Attachments Add, Serve, Remove ------------------------

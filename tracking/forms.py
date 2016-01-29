@@ -87,6 +87,30 @@ class RevisionAddForm(forms.Form):
             del self.fields['add_date']
 
 
+class CommentAddForm(forms.Form):
+    revision = forms.ModelChoiceField(queryset=None,
+                                      to_field_name='number', required=True)
+    desc = forms.CharField(max_length=500, required=True)
+    text = forms.CharField(max_length=1000, required=True)
+    status = forms.ChoiceField(required=False,
+                                   widget=forms.Select,
+                                   choices=((None, '--'),
+                                   ('open', 'Open'),
+                                   ('closed' , 'Closed'))) 
+    
+    def __init__(self, drawing_name=None, edit=False, check=False, *args, **kwargs):
+        super(CommentAddForm, self).__init__(*args, **kwargs)
+        if check:
+            del self.fields['revision']
+        if drawing_name:
+            dwg = Drawing.objects.get(name=drawing_name)
+            self.fields['revision'].queryset = Revision.objects.filter(drawing=dwg).order_by('number')
+        if edit:
+            self.fields['desc'].required = False
+            self.fields['test'].required = False
+
+
+
 class FileForm(forms.Form):
     newfile = forms.FileField(label='Select a file',
                               help_text='''<small>pdfs prefered<br/>
