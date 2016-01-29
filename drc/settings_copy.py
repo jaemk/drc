@@ -35,13 +35,13 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'tracking.apps.TrackingConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'tracking.apps.TrackingConfig',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -84,7 +84,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'drc',
         'USER': 'drc_user',
-        'PASSWORD': 'mysecret',
+        'PASSWORD': 'wordswordswords',
         'HOST': 'localhost',
         'PORT': '',
     }
@@ -136,3 +136,11 @@ STATIC_URL = '/static/'
 # AutoLogout Time in minutes
 # AUTO_LOGOUT_DELAY = 10
 SESSION_COOKIE_AGE = 15 * 60
+
+# Celery Settings
+BROKER_URL = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_INCLUDE = ['tracking.tasks']
+CELERY_RESULT_BACKEND = 'redis'
