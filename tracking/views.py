@@ -617,16 +617,6 @@ def comment_edit(request, com_id):
     return render(request, 'tracking/comment_add.html', context)
 
 
-    if not dwg:
-        dwg = Drawing.objects.get(name=drawing_name)
-    revision = Revision.objects.filter(drawing=dwg).get(number=rev_no)
-    context = {'drawing':dwg, 'revision':revision, 'form':edit_form, 
-               'is_edit':True, 'error':error, 'username':user}
-    return render(request, 'tracking/revision_add.html', context)
-
-
-
-
 #---------------------  Reply Detail ------------------------
 @login_required
 def reply_detail(request, com_id, rep_id):

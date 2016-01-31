@@ -88,7 +88,6 @@ class RevisionAddForm(forms.Form):
 
 
 class CommentAddForm(forms.Form):
-    # drawing = forms.CharField(widget=forms.HiddenInput(), required=False),
     revision = forms.ModelMultipleChoiceField(queryset=None,
                                       to_field_name='number', required=True)
     desc = forms.CharField(max_length=500, required=True)
@@ -109,7 +108,6 @@ class CommentAddForm(forms.Form):
             self.fields['revision'].queryset = Revision.objects.all()
             self.fields['desc'].required = False
             self.fields['text'].required = False
-
 
 
 class FileForm(forms.Form):
