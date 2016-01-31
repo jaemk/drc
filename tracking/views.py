@@ -624,6 +624,9 @@ def _remove_attch(request, item_type, item_id, info):
         filepath = f.upload.name
         f.delete()
         os.remove(os.path.join(settings.MEDIA_ROOT, filepath))
+        base = os.path.dirname(os.path.join(settings.MEDIA_ROOT, filepath))
+        if not os.listdir(base):
+            os.rmdir(base)
 
     args = { 'drawing':[obj.name]        if item_type == 'drawing' else None, 
             'revision':[obj.drawing.name, 
