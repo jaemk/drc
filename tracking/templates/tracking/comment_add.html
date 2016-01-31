@@ -3,13 +3,20 @@
 {% block content %}
 
 {% if comment %}
-    <h3> Comment: {{ comment.id }} on {{ comment.revision.all }}</h3>
+    <h3> Comment: {{ comment.id }} on 
+        {% for rev in comment.revision.all %}
+        <a href="{% url 'tracking:revision_detail' drawing_name=rev.drawing.name rev_no=rev.number %}"> {{ rev.drawing.name.upper }}-{{rev.number.upper}}</a> , 
+        {% endfor %}
+    </h3>
 <!-- <a href="javascript:history.go(-1);">Return to prev</a> -->
     <a href="{% url 'tracking:comment_detail' com_id=comment.id %}">Return to Comment</a>
 {% else %}
     <h3> Add New Comment 
-        {% if drawing %}
-        on <a href="{% url 'tracking:drawing_detail' drawing_name=drawing.name %}">{{drawing.name.upper}}</a>
+        {% if revisions %}
+        on 
+            {% for rev in revisions %}
+            <a href="{% url 'tracking:revision_detail' drawing_name=rev.drawing.name rev_no=rev.number %}">{{rev.drawing.name.upper}}-{{rev.number.upper}}</a>, 
+            {% endfor %}
         {% endif %}
     </h3>
 {% endif %}
@@ -39,7 +46,7 @@
 {% if is_edit %}
     <form action="{% url 'tracking:comment_edit' com_id=comment.id %}" method="Post" enctype="multipart/form-data">
 {% else %}
-    <form action="{% url 'tracking:comment_add' %}" method="Post" enctype="multipart/form-data">
+    <form action="{% url 'tracking:drawing_comment_add' drawing_name=drawing.name %}" method="Post" enctype="multipart/form-data">
 {% endif %}
 
     {% csrf_token %}

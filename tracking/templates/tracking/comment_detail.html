@@ -13,7 +13,7 @@
 <table class="info-table rev-table">
     <col width="100">
     <col width="300">
-    <caption><strong> -- Comment Info #edit# -- </strong></caption>
+    <caption><strong> -- Comment Info <a href="{% url 'tracking:comment_edit' comment.id %}"><small> Edit </small></a> -- </strong></caption>
     <tr><th> ID </th><td> {{ comment.id }} </td></tr>
     <tr><th> Status <a href="{% url 'tracking:toggle_comment' com_id=comment.id %}" >
     <small>

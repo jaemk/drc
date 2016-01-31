@@ -514,44 +514,117 @@ def comment_detail(request, com_id):
 @login_required
 def drawing_comment_add(request, drawing_name):
     user = _get_user(request) 
+    
+    error = None
+    if request.method == 'POST':
+        #print(request.POST['revision'], request.POST['drawing'])
+        add_form = CommentAddForm(drawing_name, False, request.POST )
+        if add_form.is_valid():
+            post_info = add_form.cleaned_data
+            # print(post_info)
+            resp, error  = _add_new_comment(request, post_info, user)
+            if not error:
+                return resp
+    else:
+        add_form = CommentAddForm(drawing_name=drawing_name, edit=False)
+
     drawing = Drawing.objects.get(name=drawing_name)
     revisions = Revision.objects.filter(drawing=drawing)
+    
 
-    add_form = CommentAddForm(drawing_name=drawing_name, edit=False, check=False)
+    #add_form = CommentAddForm(drawing_name=drawing_name, rev_no=None, edit=False)
     context = {'username':user, 'drawing':drawing,
                'revisions':revisions, 'form':add_form}
     return render(request, 'tracking/comment_add.html', context)
-    #return httpresp(' add new comment on {}'.format(drawing_name))
 
 
 def _add_new_comment(request, post_info, user):
-    return httpresp('{}'.format(post_info.items()))
+    ''' check form data against name regex's 
+        create and save new drawing '''
+    #return httpresp('{}'.format(post_info.items()))
+    error = None
+    new_com = {}
+    for key, val in post_info.items():
+        if not val:
+            continue
+        if key == 'status':
+            stat = {'open':True, 'closed':False, '':True}
+            new_com['status'] = stat[val]
+        elif key == 'desc':
+            new_com[key] = val.lower()
+        elif key == 'revision':
+            revs = val
+        else:
+            new_com[key] = val
+
+    resp = None
+    if not error:
+        new_com['mod_date'] = timezone.now()
+        new_com['mod_by'] = user
+        new_com['owner'] = user
+        comment = Comment(**new_com)
+        comment.save()
+        for rev in revs:
+            comment.revision.add(rev)
+            comment.save()
+
+        resp = httprespred(reverse('tracking:comment_detail',
+                                   args=[comment.id]))
+    return resp, error
+
+
 
 @login_required
 def comment_add(request):
     user = _get_user(request)
     error = None
     if request.method == 'POST':
-        add_form = CommentAddForm(None, False, True,  request.POST)
-        if add_form.is_valid():
-            post_info = add_form.cleaned_data
-            # print(post_info)
-            resp = _add_new_comment(request, post_info, user)
-            if not error:
-                return resp
+        pass
+    
     else:
-        add_form = CommentAddForm(drawing_name='_', edit=False, check=False)
+        add_form = CommentAddForm(drawing_name=None, edit=False)
 
     context = {'form':add_form, 'drawing':None, 'is_edit':False, 
                'error':error, 'username':user}
     return render(request, 'tracking/comment_add.html', context)
 
-    # return httpresp(''' add comment ''')
 
+def _update_comment_info(com_id, post_info, user):
+    resp = httpresp('update comment id:{}'.format(com_id))
+    return resp, None
 
 @login_required
 def comment_edit(request, com_id):
-    return httpresp(''' edit comment ''')
+    # return httpresp(''' edit comment ''')
+    user = _get_user(request)
+
+    error = None
+    if request.method == 'POST':
+        edit_form = CommentAddForm(None, True, request.POST)
+        if edit_form.is_valid():
+            post_info = edit_form.cleaned_data
+            resp, error = _update_comment_info(com_id,
+                                               post_info, user)
+            if not error:
+                return resp
+
+    else:
+        edit_form = CommentAddForm(drawing_name=None, edit=True)
+
+    comment = Comment.objects.get(pk=com_id)
+    context = {'username':user, 'comment':comment, 'revisions':comment.revision.all(),
+               'is_edit':True, 'form':edit_form}
+    return render(request, 'tracking/comment_add.html', context)
+
+
+    if not dwg:
+        dwg = Drawing.objects.get(name=drawing_name)
+    revision = Revision.objects.filter(drawing=dwg).get(number=rev_no)
+    context = {'drawing':dwg, 'revision':revision, 'form':edit_form, 
+               'is_edit':True, 'error':error, 'username':user}
+    return render(request, 'tracking/revision_add.html', context)
+
+
 
 
 #---------------------  Reply Detail ------------------------

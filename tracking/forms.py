@@ -88,7 +88,8 @@ class RevisionAddForm(forms.Form):
 
 
 class CommentAddForm(forms.Form):
-    revision = forms.ModelChoiceField(queryset=None,
+    # drawing = forms.CharField(widget=forms.HiddenInput(), required=False),
+    revision = forms.ModelMultipleChoiceField(queryset=None,
                                       to_field_name='number', required=True)
     desc = forms.CharField(max_length=500, required=True)
     text = forms.CharField(max_length=1000, required=True)
@@ -98,16 +99,16 @@ class CommentAddForm(forms.Form):
                                    ('open', 'Open'),
                                    ('closed' , 'Closed'))) 
     
-    def __init__(self, drawing_name=None, edit=False, check=False, *args, **kwargs):
+    def __init__(self, drawing_name=None, edit=False, *args, **kwargs):
         super(CommentAddForm, self).__init__(*args, **kwargs)
-        if check:
-            del self.fields['revision']
         if drawing_name:
             dwg = Drawing.objects.get(name=drawing_name)
             self.fields['revision'].queryset = Revision.objects.filter(drawing=dwg).order_by('number')
+
         if edit:
+            self.fields['revision'].queryset = Revision.objects.all()
             self.fields['desc'].required = False
-            self.fields['test'].required = False
+            self.fields['text'].required = False
 
 
 
