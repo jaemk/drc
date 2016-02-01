@@ -89,32 +89,41 @@ class RevisionAddForm(forms.Form):
 
 class CommentAddForm(forms.Form):
     revision = forms.ModelMultipleChoiceField(queryset=None,
-                                      to_field_name='number', required=True)
+                                             to_field_name='number', 
+                                             required=True,
+                                             help_text='''<small>select 
+                                                          multiple </small>''')
     desc = forms.CharField(max_length=500, required=True)
-    text = forms.CharField(max_length=1000, required=True)
+    text = forms.CharField(max_length=1000, required=True,
+                           widget=forms.Textarea)
     status = forms.ChoiceField(required=False,
-                                   widget=forms.Select,
-                                   choices=((None, '--'),
-                                   ('open', 'Open'),
-                                   ('closed' , 'Closed'))) 
+                               help_text='<small>defaults to open</small>',
+                               widget=forms.Select,
+                               choices=((None, '--'),
+                               ('open', 'Open'),
+                               ('closed' , 'Closed'))) 
     
     def __init__(self, drawing_name=None, edit=False, *args, **kwargs):
         super(CommentAddForm, self).__init__(*args, **kwargs)
         if drawing_name:
             dwg = Drawing.objects.get(name=drawing_name)
-            self.fields['revision'].queryset = Revision.objects.filter(drawing=dwg).order_by('number')
+            self.fields['revision'].queryset = Revision.objects.filter(drawing=dwg)\
+                                                               .order_by('number')
 
         if edit:
             self.fields['revision'].queryset = Revision.objects.all()
+            self.fields['revision'].required = False
             self.fields['desc'].required = False
             self.fields['text'].required = False
+            self.fields['status'].help_text = None
 
 
 class FileForm(forms.Form):
     newfile = forms.FileField(label='Select a file',
                               help_text='''<small>pdfs prefered<br/>
                                            all formats accepted<br/>
-                                           only single file upload per submission</small>''')
+                                           only single file upload per 
+                                           submission</small>''')
 
 
 def _get_file_set(item_type, item_id):

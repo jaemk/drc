@@ -590,30 +590,56 @@ def comment_add(request):
 
 
 def _update_comment_info(com_id, post_info, user):
-    resp = httpresp('update comment id:{}'.format(com_id))
-    return resp, None
+    info = {}
+    error = None
+
+    for key, val in post_info.items():
+        if not val:
+            continue
+        if key == 'status':
+            stat = {'open':True, 'closed':False, '':True}
+            info['status'] = stat[val]
+        elif key == 'desc':
+            info[key] = val.lower()
+        elif key == 'revision':
+            com = Comment.objects.get(pk=com_id)
+            com.revision.clear()
+            for rev in val:
+                com.revision.add(rev)
+            com.save()
+        else:
+            info[key] = val
+
+    comment = Comment.objects.filter(pk=com_id)
+    resp = None
+    if not error:
+        info['mod_date'] = timezone.now()
+        info['mod_by'] = user
+        comment.update(**info)
+
+    return comment.first(), error
+
 
 @login_required
 def comment_edit(request, com_id):
-    # return httpresp(''' edit comment ''')
     user = _get_user(request)
 
     error = None
+    comment = None
     if request.method == 'POST':
         edit_form = CommentAddForm(None, True, request.POST)
         if edit_form.is_valid():
             post_info = edit_form.cleaned_data
-            resp, error = _update_comment_info(com_id,
+            comment, error = _update_comment_info(com_id,
                                                post_info, user)
-            if not error:
-                return resp
 
     else:
         edit_form = CommentAddForm(drawing_name=None, edit=True)
 
-    comment = Comment.objects.get(pk=com_id)
+    if not comment:
+        comment = Comment.objects.get(pk=com_id)
     context = {'username':user, 'comment':comment, 'revisions':comment.revision.all(),
-               'is_edit':True, 'form':edit_form}
+               'is_edit':True, 'form':edit_form, 'error':error}
     return render(request, 'tracking/comment_add.html', context)
 
 

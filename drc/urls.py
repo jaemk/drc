@@ -14,6 +14,7 @@ Including another URLconf
     2. Import the include() function: from django.conf.urls import url, include
     3. Add a URL to urlpatterns:  url(r'^blog/', include(blog_urls))
 """
+import os
 from django.conf.urls import url
 from django.conf.urls import patterns
 from django.conf.urls import include
@@ -21,12 +22,15 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
+from django.http import HttpResponseRedirect as httprespred
 
 from tracking import urls as tracking_urls
 from tracking import views as tracking_views
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    url(r'^favicon\.ico$', lambda x: httprespred(os.path.join(settings.STATIC_URL, 
+                                                              'images', 'favicon.ico'))),
     url(r'^accounts/login', auth_views.login, {'template_name': 'tracking/login.html'}, name='login'),
     url(r'^accounts/logout', tracking_views.logout_view, name='logout'),
     url(r'^', include(tracking_urls)),

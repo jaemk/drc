@@ -33,9 +33,9 @@
                                         {{ rev.drawing.name.upper }}-{{ rev.number.upper }},
                                     {% endfor %}
                                     {% endif %}</td></tr>
-        <tr><th> Description </th><td> desc </td></tr>
-        <tr><th> Text </th></td> <td> Text </td></tr>
-        <tr><th> Status </th><td> open </td></td>
+        <tr><th> Description </th><td> {{comment.desc}} </td></tr>
+        <tr><th> Text </th></td> <td> {{comment.text}} </td></tr>
+        <tr><th> Status </th><td> {{comment.status}} </td></td>
     </table> <!-- so tired -->
 {% endif %}
 
@@ -52,7 +52,7 @@
     {% csrf_token %}
     {{ form.errors }}
     {{ form.non_field_errors }}
-    <table class="search-table">
+    <table class="info-table">
         <caption> 
             {% if is_edit %} New Info: Any fields you fill here will overwrite the current.
             {% else %} New Revision Info 
