@@ -10,14 +10,14 @@
 
     <table class="info-table rev-table">
     <col width="50">
-    <col width="75">
+    <col width="100">
     <col width="120">
     <col width="200">
     <caption><strong> -- Open Comments -- </strong></caption>
     <tr><th> ID </th><th> Date </th><th> Owner </th><th> Description </th><th> On Revs </th><th>No. Replies</th></tr>
     {% if comments %}
         {% for com in comments %}
-        <tr><td><a href="{% url 'tracking:comment_detail' com_id=com.id %}">{{ com.id }} </a></td><td>{{com.date.month}}-{{com.date.day}}-{{com.date.year}}</td><td>{{ com.owner }}</td><td>{{ com.desc }}</td><td>{{ com.revisions }}</td><td>{{ com.number_replies }}</tr>
+        <tr><td><a href="{% url 'tracking:comment_detail' com_id=com.id %}">{{ com.id }} </a></td><td>{{com.add_date|date:"m-d-Y" }}</td><td>{{ com.owner }}</td><td>{{ com.desc }}</td><td>{{ com.revisions }}</td><td>{{ com.number_replies }}</tr>
         {% endfor %}
 
     {% else %}

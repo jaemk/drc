@@ -51,7 +51,7 @@
 <col width="120">
 <col width="200">
 <col width="500">
-<caption><strong> -- Replies #add# -- </strong></caption>
+<caption><strong> -- Replies <a href="{% url 'tracking:comment_reply_add' comment.id %}"><small> Add </small></a> -- </strong></caption>
 <tr><th> No. </th><th> Date </th><th> Owner </th><th> Description </th><th> Info </th><th>Attachments</th></tr>
 {% if replies %}
     {% for rep in replies %}

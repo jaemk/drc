@@ -1,0 +1,63 @@
+{% extends 'tracking/base.html' %}
+
+{% block content %}
+
+{% if reply %}
+    <h3> Reply: {{ reply.number }} on Comment:
+        <a href="{% url 'tracking:comment_detail' com_id=reply.comment.id %}">{{comment.id}}</a>
+    </h3>
+<!-- <a href="javascript:history.go(-1);">Return to prev</a> -->
+    <a href="{% url 'tracking:reply_detail' com_id=comment.id rep_no=reply.number%}">Return to Reply</a>
+{% else %}
+    <h3> Add New Reply 
+        {% if comment %}
+        on Comment:
+            <a href="{% url 'tracking:comment_detail' com_id=comment.id %}">{{comment.id}}</a>
+        {% endif %}
+    </h3>
+{% endif %}
+
+<br/>
+
+{% if is_edit %}
+    <table class="info-table">
+        <col width="120">
+        <col width="300">
+        <caption> Current Info: Will be overwritten </caption>
+        <tr><th> Description </th><td> {{reply.desc}} </td></tr>
+        <tr><th> Text </th></td> <td> {{reply.text}} </td></tr>
+    </table> 
+{% endif %}
+
+{% if error %}
+    Error: {{ error }}
+    <br/>
+    <a href="javascript:history.go(-1);">
+                       Return to prev</a>
+{% endif %}
+
+{% if is_edit %}
+    <form action="{% url 'tracking:reply_edit' com_id=reply.comment.id rep_no=reply.number%}" method="Post" enctype="multipart/form-data">
+{% else %}
+    <form action="{% url 'tracking:comment_reply_add' com_id=comment.id %}" method="Post" enctype="multipart/form-data">
+{% endif %}
+
+    {% csrf_token %}
+    <table class="info-table">
+        <caption> 
+            {% if is_edit %} New Info: Any fields you fill here will overwrite the current.
+            {% else %} New Reply Info <br/> <small> (you can add attachments after filling in this info)</small>
+            {% endif %} 
+        </caption>
+        {{ form.as_table }}
+    </table>
+    {% if is_edit %}
+        <p><input type="submit" value="Submit Changes & Overwrite Existing"/></p>
+    {% else %}
+        <p><input type="submit" value="Submit New Revision Info"/></p>
+    {% endif %}
+</form>
+
+
+{% endblock %}
+

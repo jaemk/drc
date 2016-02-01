@@ -15,6 +15,7 @@ from .models import Comment
 from .models import CommentAttachment
 from .models import Reply
 from .models import ReplyAttachment
+from .models import Project
 
 admin.site.register(Block)
 admin.site.register(Phase)
@@ -28,4 +29,5 @@ admin.site.register(Comment)
 admin.site.register(CommentAttachment)
 admin.site.register(Reply)
 admin.site.register(ReplyAttachment)
+admin.site.register(Project)
 

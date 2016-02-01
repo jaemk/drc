@@ -33,6 +33,7 @@ from .forms import DrawingAddForm
 from .forms import RemoveFileForm
 from .forms import RevisionAddForm
 from .forms import CommentAddForm 
+from .forms import ReplyAddForm
 
 from .tasks import test
 
@@ -660,14 +661,100 @@ def reply_detail(request, com_id, rep_no):
 
 
 @login_required
-def comment_reply_add(request, com_id):
-    return httpresp('add reply on com: {}'.format(com_id))
+def comment_reply_add(request, com_id):    
+    user = _get_user(request) 
+    error = None
+    if request.method == 'POST':
+        add_form = ReplyAddForm(False, request.POST )
+        if add_form.is_valid():
+            post_info = add_form.cleaned_data
+            resp, error  = _add_new_reply(request, post_info, user, com_id)
+            if not error:
+                return resp
+    # else:
+    add_form = ReplyAddForm(edit=False)
+
+    comment = Comment.objects.get(pk=com_id)
+    reply = None
+
+    context = {'username':user, 'comment':comment,
+               'reply':reply, 'form':add_form, 'error':error}
+    return render(request, 'tracking/reply_add.html', context)
+
+
+def _add_new_reply(request, post_info, user, com_id):
+    ''' check form data, create and save new reply '''
+    error = None
+    new_rep = {}
+    for key, val in post_info.items():
+        if not val:
+            continue
+        else:
+            new_rep[key] = val
+
+    resp = None
+    comment = Comment.objects.get(pk=com_id)
+    if not error:
+        new_rep['number'] = comment.number_replies() + 1
+        new_rep['comment'] = comment
+        new_rep['mod_date'] = timezone.now()
+        new_rep['mod_by'] = user
+        new_rep['owner'] = user
+        reply = Reply(**new_rep)
+        reply.save()
+
+        resp = httprespred(reverse('tracking:reply_detail',
+                                   args=[comment.id, new_rep['number']]))
+    return resp, error
 
 
 @login_required
 def reply_edit(request, com_id, rep_no):
-    return httpresp('Edit reply: {} on com: {}'.format(rep_no, com_id))
+    # return httpresp('Edit reply: {} on com: {}'.format(rep_no, com_id))
+    user = _get_user(request)
 
+    error = None
+    reply = None
+    comment = None
+    if request.method == 'POST':
+        edit_form = ReplyAddForm(True, request.POST)
+        if edit_form.is_valid():
+            post_info = edit_form.cleaned_data
+            reply, comment, error = _update_reply_info(com_id, rep_no,
+                                               post_info, user)
+
+    # else:
+    edit_form = ReplyAddForm(edit=True)
+
+    if not comment:
+        comment = Comment.objects.get(pk=com_id)
+
+    if not reply:
+        reply = Reply.objects.filter(comment=comment, number=rep_no).first()
+
+    context = {'username':user, 'comment':comment, 'reply':reply,
+               'is_edit':True, 'form':edit_form, 'error':error}
+    return render(request, 'tracking/reply_add.html', context)
+
+
+def _update_reply_info(com_id, rep_no, post_info, user):
+    info = {}
+    error = None
+    comment = Comment.objects.get(pk=com_id)
+    for key, val in post_info.items():
+        if not val:
+            continue
+        else:
+            info[key] = val
+
+    comment = Comment.objects.get(pk=com_id)
+    reply = Reply.objects.filter(comment=comment, number=rep_no)
+    if not error:
+        info['mod_date'] = timezone.now()
+        info['mod_by'] = user
+        reply.update(**info)
+
+    return reply.first(), comment, error
 
 
 #----------------------  Attachments Add, Serve, Remove ------------------------
