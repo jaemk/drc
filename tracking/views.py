@@ -11,6 +11,7 @@ from django.core.urlresolvers import reverse
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
+from django.contrib.auth import authenticate
 
 from django.conf import settings
 from django.utils import timezone
@@ -50,14 +51,25 @@ def _get_user(request):
 
     return user
 
+# def login_view(request):
+#     if request.POST:
+#         username = request.POST.get('username', '')
+#         password = request.POST.get('password', '')
+#         user = authenticate(username=username, password=password)
+#         if user:
+#             return httprespred(reverse('tracking:index'))
+
+#     return render(request, 'tracking/login.html')
+
 
 def logout_view(request):
     ''' Logout confirmation '''
     user = request.user
     logout(request)
-    return httpresp('''Goodbye {} !<br>
-                    You\'ve successfully logged out!<br>
-                    <a href="/">return to homepage</a>'''.format(user))
+    return render(request, 'tracking/logout.html', {'username':user})
+    # return httpresp('''Goodbye {} !<br>
+    #                 You\'ve successfully logged out!<br>
+    #                 <a href="/">return to homepage</a>'''.format(user))
 
 
 #---------------------- Index ------------------------
@@ -126,6 +138,10 @@ def _pull_drawings(formdat):
         dquery = Drawing.objects.filter(pk__in=revs.values_list('drawing', flat=True))
     else:
         dquery = Drawing.objects
+
+    # Filter drawings by project
+    if formdat['project']:
+        dquery = dquery.filter(project=formdat['project'])
 
     # Filter drawings based on Department name
     if formdat['department_name']:
@@ -671,12 +687,11 @@ def comment_reply_add(request, com_id):
             resp, error  = _add_new_reply(request, post_info, user, com_id)
             if not error:
                 return resp
-    # else:
+
     add_form = ReplyAddForm(edit=False)
 
     comment = Comment.objects.get(pk=com_id)
     reply = None
-
     context = {'username':user, 'comment':comment,
                'reply':reply, 'form':add_form, 'error':error}
     return render(request, 'tracking/reply_add.html', context)
@@ -691,6 +706,9 @@ def _add_new_reply(request, post_info, user, com_id):
             continue
         else:
             new_rep[key] = val
+
+    if not new_rep:
+        return None, 'Please fill all fields'
 
     resp = None
     comment = Comment.objects.get(pk=com_id)
@@ -797,8 +815,8 @@ def add_attachment(request, item_type, item_id):
                 else:
                     return _store_attch(request, item_type, item_id, user)
 
-        else:
-            print('form not valid')
+        # else:
+        #     print('form not valid')
 
     file_form = FileForm()
 
@@ -844,8 +862,8 @@ def remove_attachment(request, item_type, item_id):
             # do something like _store_attch
             return _remove_attch(request, item_type, item_id, info)
 
-        else:
-            print('form not valid')
+        # else:
+        #     print('form not valid')
 
     remove_file_form = RemoveFileForm(item_type, item_id)
 

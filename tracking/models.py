@@ -9,7 +9,7 @@ class Project(models.Model):
     name = models.CharField(max_length=200)
 
     def __repr__(self):
-        return '<Proj: {}'.format(self.name)
+        return '<Proj: {}>'.format(self.name)
 
     def __str__(self):
         return '{}'.format(self.name.upper())

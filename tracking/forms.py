@@ -29,6 +29,8 @@ class SearchForm(forms.Form):
                                        widget=forms.CheckboxSelectMultiple,
                                        choices=(('review', 'New/Review'),
                                                 ('approved', 'Final/Approved')))
+    project = forms.ModelChoiceField(queryset=Project.objects.all(),
+                                      to_field_name='name', required=False)
     block_name = forms.CharField(max_length=150, required=False)
     department_name = forms.CharField(max_length=150, required=False)
 

@@ -43,6 +43,8 @@
 {% endif %}
 
     {% csrf_token %}
+    <!--     {{ form.errors }}
+{{ form.non_field_errors }} -->
     <table class="info-table">
         <caption> 
             {% if is_edit %} New Info: Any fields you fill here will overwrite the current.
@@ -54,7 +56,7 @@
     {% if is_edit %}
         <p><input type="submit" value="Submit Changes & Overwrite Existing"/></p>
     {% else %}
-        <p><input type="submit" value="Submit New Revision Info"/></p>
+        <p><input type="submit" value="Submit New Reply Info"/></p>
     {% endif %}
 </form>
 

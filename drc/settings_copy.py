@@ -24,12 +24,18 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'secret'
+SECRET_KEY = 'oops'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = True
 
-ALLOWED_HOSTS = []
+
+## DEPLOY
+DEBUG = False
+# CSRF_COOKIE_SECURE = True
+X_FRAME_OPTIONS = 'DENY'
+
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -84,7 +90,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'drc',
         'USER': 'drc_user',
-        'PASSWORD': 'words',
+        'PASSWORD': 'oops',
         'HOST': 'localhost',
         'PORT': '',
     }
@@ -136,6 +142,7 @@ STATIC_URL = '/static/'
 # AutoLogout Time in minutes
 # AUTO_LOGOUT_DELAY = 10
 SESSION_COOKIE_AGE = 15 * 60
+
 
 # Celery Settings
 BROKER_URL = 'redis://localhost:6379/0'

@@ -8,6 +8,7 @@ from ..models import Drawing
 from ..models import Revision
 from ..models import Comment
 from ..models import Reply
+from ..models import Project
 
 import os
 import datetime
@@ -17,6 +18,7 @@ import pytz
 location = os.path.dirname(os.path.realpath(__file__))
 block_file = 'blocks.csv'
 phase_file = 'phases.csv'
+project_file = 'projects.csv'
 department_file = 'departments.csv'
 discipline_file = 'disciplines.csv'
 drawing_file = 'drawings.csv'
@@ -79,6 +81,25 @@ def add_blocks():
             test.add(item)
             added += 1
             print('  -> Added Block: {}'.format(item))
+    print('->> Total added: {}'.format(added - len(prev)))
+
+
+def add_projects():
+    print('Populating Projects...')
+    info = _parse_file(name=project_file, headers=False)
+    keyval = project_file.split('.')[0]
+    already = Project.objects.all()
+    prev = [proj.name for proj in already]
+    added = len(prev)
+    test = set(prev)
+    print('->> Total already in: {}'.format(added))
+    for item in info[keyval]:
+        if item not in test:
+            new_proj = Project(name=item)
+            new_proj.save()
+            test.add(item)
+            added += 1
+            print('  -> Added Project: {}'.format(item))
     print('->> Total added: {}'.format(added - len(prev)))
 
 
