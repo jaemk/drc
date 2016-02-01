@@ -27,6 +27,9 @@
 
 {% if error %}
     Error: {{ error }}
+    <br/>
+    <a href="javascript:history.go(-1);">
+                       Return to prev</a>
 {% endif %}
 
 {% if is_edit %}
@@ -36,8 +39,8 @@
 {% endif %}
 
     {% csrf_token %}
-    {{ form.errors }}
-    {{ form.non_field_errors }}
+<!--     {{ form.errors }}
+    {{ form.non_field_errors }} -->
     <table class="search-table">
         <caption> 
             {% if is_edit %} New Info: Any fields you fill here will overwrite the current.

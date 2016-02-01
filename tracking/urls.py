@@ -31,17 +31,21 @@ urlpatterns = [
     url(r'^drawing/(?P<drawing_name>[a-zA-Z0-9_-]+)/edit/rev/(?P<rev_no>[a-z-A-Z0-9_\.-]+)/$',
         views.revision_edit, name='revision_edit'),
 
-    # Comment (detail, add)
+    # Comment (detail, add, edit)
     url(r'^comment/(?P<com_id>[0-9_]+)/$',
         views.comment_detail, name='comment_detail'),
     url(r'^add/comment/on/(?P<drawing_name>[a-zA-Z0-9_-]+)/$',
         views.drawing_comment_add, name='drawing_comment_add'),
-    url(r'^add/comment/$', views.comment_add, name='comment_add'),
+    # url(r'^add/comment/$', views.comment_add, name='comment_add'),
     url(r'^comment/(?P<com_id>[0-9_]+)/edit/$', views.comment_edit, name='comment_edit'),
 
-    # Reply (detail)
-    url(r'^comment/(?P<com_id>[0-9_]+)/reply/(?P<rep_id>[0-9_]+)/$',
+    # Reply (detail, add)
+    url(r'^comment/(?P<com_id>[0-9_]+)/reply/(?P<rep_no>[0-9_]+)/$',
         views.reply_detail, name='reply_detail'),
+    url(r'^comment/(?P<com_id>[0-9_]+)/add/reply/$', 
+        views.comment_reply_add, name='comment_reply_add'),
+    url(r'^comment/(?P<com_id>[0-9_]+)/edit/reply/(?P<rep_no>[0-9_]+)/$',
+        views.reply_edit, name='reply_edit'),
 
     # Attachment (add, serve, remove)
     url(r'^attachment/add/(?P<item_type>(drawing|revision|comment|reply))/(?P<item_id>[0-9_]+)/$',

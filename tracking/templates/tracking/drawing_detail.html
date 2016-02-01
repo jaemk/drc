@@ -38,7 +38,7 @@
     <tr><th> No. </th><th> Date </th><th> Description </th> </tr>
     {% if revisions %}
         {% for rev in revisions %}
-        <tr><td><a href="{% url 'tracking:revision_detail' drawing_name=drawing.name rev_no=rev.number %}">{{ rev.number }} </a></td><td>{{rev.add_date|date:"m-d-Y"}}</td><td>{{ rev.desc.capitalize }}</td></tr>
+        <tr><td><a href="{% url 'tracking:revision_detail' drawing_name=drawing.name rev_no=rev.number %}">{{ rev.number.upper }} </a></td><td>{{rev.add_date|date:"m-d-Y"}}</td><td>{{ rev.desc.capitalize }}</td></tr>
         {% endfor %}
     {% else %}
     <tr><td colspan="3" style="text-align:center"><strong> No Revisions </strong></td></tr>

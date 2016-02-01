@@ -179,11 +179,11 @@ def _get_drawing_detail(drawing_name):
                'department':dwg.department,  'discipline':dwg.discipline,
                'kind':dwg.kind, 'attachments':dwg_attch, 'id':dwg.id}
 
-    revs = Revision.objects.filter(drawing=dwg)
+    revs = Revision.objects.filter(drawing=dwg).order_by('number')
     revisions = [{'id':rev.id,         'number':rev.number,
                   'date':rev.add_date, 'desc':rev.desc} for rev in revs]
 
-    coms = Comment.objects.filter(revision__in=revs)
+    coms = Comment.objects.filter(revision__in=revs).order_by('-status')
     comments = coms
 
     context = {'drawing':drawing, 'revisions':revs,
@@ -335,7 +335,7 @@ def revision_detail(request, drawing_name, rev_no):
     user = _get_user(request)
     dwg = Drawing.objects.get(name=drawing_name)
     revision = Revision.objects.filter(drawing=dwg).get(number=rev_no)
-    comments = Comment.objects.filter(revision=revision)
+    comments = Comment.objects.filter(revision=revision).order_by('-status')
     attachments = RevisionAttachment.objects.filter(link=revision)
     context = {'revision':revision, 'comments':comments,
                'attachments':attachments, 'username':user}
@@ -473,10 +473,12 @@ def revision_add(request):
         add_form = RevisionAddForm(None, False, request.POST)
         if add_form.is_valid():
             post_info = add_form.cleaned_data
-            # print(post_info)
             resp, error = _add_new_revision(request, post_info, user)
             if not error:
                 return resp
+        else:
+            error = '''Missing Requried Fields.
+                       Return to prev. page for drawing field to re-filter'''
     else:
         add_form = RevisionAddForm(drawing_name=None, edit=False)
 
@@ -530,11 +532,12 @@ def drawing_comment_add(request, drawing_name):
 
     drawing = Drawing.objects.get(name=drawing_name)
     revisions = Revision.objects.filter(drawing=drawing)
-    
+    if not revisions:
+        error = 'Please add a revision to comment on'
 
     #add_form = CommentAddForm(drawing_name=drawing_name, rev_no=None, edit=False)
     context = {'username':user, 'drawing':drawing,
-               'revisions':revisions, 'form':add_form}
+               'revisions':revisions, 'form':add_form, 'error':error}
     return render(request, 'tracking/comment_add.html', context)
 
 
@@ -574,19 +577,19 @@ def _add_new_comment(request, post_info, user):
 
 
 
-@login_required
-def comment_add(request):
-    user = _get_user(request)
-    error = None
-    if request.method == 'POST':
-        pass
-    
-    else:
-        add_form = CommentAddForm(drawing_name=None, edit=False)
+# @login_required
+# def comment_add(request):
+#     ''' unused view - for adding to arbitrary revision '''
+#     user = _get_user(request)
+#     error = None
+#     if request.method == 'POST':
+#         pass
 
-    context = {'form':add_form, 'drawing':None, 'is_edit':False, 
-               'error':error, 'username':user}
-    return render(request, 'tracking/comment_add.html', context)
+#     add_form = CommentAddForm(drawing_name=None, edit=False)
+
+#     context = {'form':add_form, 'drawing':None, 'is_edit':False, 
+#                'error':error, 'username':user}
+#     return render(request, 'tracking/comment_add.html', context)
 
 
 def _update_comment_info(com_id, post_info, user):
@@ -645,9 +648,21 @@ def comment_edit(request, com_id):
 
 #---------------------  Reply Detail ------------------------
 @login_required
-def reply_detail(request, com_id, rep_id):
+def reply_detail(request, com_id, rep_no):
 
-    return httpresp('reply: {} on com: {}'.format(rep_id, com_id))
+    return httpresp('reply: {} on com: {}'.format(rep_no, com_id))
+
+
+
+@login_required
+def comment_reply_add(request, com_id):
+    pass
+
+
+@login_required
+def reply_edit(request, com_id, rep_no):
+    pass
+
 
 
 #----------------------  Attachments Add, Serve, Remove ------------------------

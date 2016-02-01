@@ -91,8 +91,8 @@ class CommentAddForm(forms.Form):
     revision = forms.ModelMultipleChoiceField(queryset=None,
                                              to_field_name='number', 
                                              required=True,
-                                             help_text='''<small>select 
-                                                          multiple </small>''')
+                                             help_text='''<small>hold ctrl to select 
+                                                          multiple</small>''')
     desc = forms.CharField(max_length=500, required=True)
     text = forms.CharField(max_length=1000, required=True,
                            widget=forms.Textarea)
@@ -116,6 +116,32 @@ class CommentAddForm(forms.Form):
             self.fields['desc'].required = False
             self.fields['text'].required = False
             self.fields['status'].help_text = None
+
+
+class ReplyAddForm(forms.Form):
+    # ModelChoiceField(queryset=Drawing.objects.all().order_by('name'),
+    #                                  to_field_name='name', required=True)
+    # comment = forms.ModelChoiceField(queryset=None,
+    #                                          to_field_name='number', 
+    #                                          required=True,
+    #                                          help_text='''<small>select 
+    #                                                       multiple </small>''')
+    desc = forms.CharField(max_length=500, required=True)
+    text = forms.CharField(max_length=1000, required=True,
+                           widget=forms.Textarea)
+    # status = forms.ChoiceField(required=False,
+    #                            help_text='<small>defaults to open</small>',
+    #                            widget=forms.Select,
+    #                            choices=((None, '--'),
+    #                            ('open', 'Open'),
+    #                            ('closed' , 'Closed'))) 
+    
+    def __init__(self, edit=False, *args, **kwargs):
+        super(ReplyAddForm, self).__init__(*args, **kwargs)
+        if edit:
+            self.fields['desc'].required = False
+            self.fields['text'].required = False
+
 
 
 class FileForm(forms.Form):

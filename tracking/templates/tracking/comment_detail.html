@@ -55,7 +55,7 @@
 <tr><th> No. </th><th> Date </th><th> Owner </th><th> Description </th><th> Info </th><th>Attachments</th></tr>
 {% if replies %}
     {% for rep in replies %}
-    <tr><td><a href="{% url 'tracking:reply_detail' com_id=comment.id rep_id=rep.reply.id %}">{{ rep.reply.number }} </a></td><td>{{rep.reply.add_date|date:"m-d-Y"}}</td><td>{{ rep.reply.owner }}</td><td>{{ rep.reply.desc }}</td><td>{{ rep.reply.text }}
+    <tr><td><a href="{% url 'tracking:reply_detail' com_id=comment.id rep_no=rep.reply.number %}">{{ rep.reply.number }} </a></td><td>{{rep.reply.add_date|date:"m-d-Y"}}</td><td>{{ rep.reply.owner }}</td><td>{{ rep.reply.desc }}</td><td>{{ rep.reply.text }}
     <td>
     
     {% if rep.attachments %}
