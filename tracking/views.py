@@ -51,16 +51,6 @@ def _get_user(request):
 
     return user
 
-# def login_view(request):
-#     if request.POST:
-#         username = request.POST.get('username', '')
-#         password = request.POST.get('password', '')
-#         user = authenticate(username=username, password=password)
-#         if user:
-#             return httprespred(reverse('tracking:index'))
-
-#     return render(request, 'tracking/login.html')
-
 
 def logout_view(request):
     ''' Logout confirmation '''
@@ -513,55 +503,43 @@ def comment_detail(request, com_id):
     comment = com.first()
     com_attch = CommentAttachment.objects.filter(link=comment)
     revs = [rev for rev in comment.revision.all()]
-    # revs = Revision.objects.prefetch_related('drawing')\
-    #             .filter(pk__in=com.values_list('revision', flat=True))
-    # dwgs = Drawing.objects.filter(pk__in=revs.values_list('drawing', flat=True))
-    
+ 
     reps = Reply.objects.filter(comment=comment).order_by('number')
     replies = [{'reply':rep, 'attachments':ReplyAttachment.objects.filter(link=rep)} for rep in reps]
 
     context = {'comment':comment, 'replies':replies,
                'com_attachments':com_attch, 'revisions':revs, 'username':user}
-               #  'revisions':revs,
-               # 'drawings':dwgs, 'attachments':attachments}
     return render(request, 'tracking/comment_detail.html', context)
 
 
-
-#----------------------  Comment Add ------------------------
-
+#----------------------  Comment Add, Edit ------------------------
 @login_required
 def drawing_comment_add(request, drawing_name):
     user = _get_user(request) 
     
     error = None
     if request.method == 'POST':
-        #print(request.POST['revision'], request.POST['drawing'])
         add_form = CommentAddForm(drawing_name, False, request.POST )
         if add_form.is_valid():
             post_info = add_form.cleaned_data
-            # print(post_info)
             resp, error  = _add_new_comment(request, post_info, user)
             if not error:
                 return resp
-    else:
-        add_form = CommentAddForm(drawing_name=drawing_name, edit=False)
+
+    add_form = CommentAddForm(drawing_name=drawing_name, edit=False)
 
     drawing = Drawing.objects.get(name=drawing_name)
     revisions = Revision.objects.filter(drawing=drawing)
     if not revisions:
         error = 'Please add a revision to comment on'
 
-    #add_form = CommentAddForm(drawing_name=drawing_name, rev_no=None, edit=False)
     context = {'username':user, 'drawing':drawing,
                'revisions':revisions, 'form':add_form, 'error':error}
     return render(request, 'tracking/comment_add.html', context)
 
 
 def _add_new_comment(request, post_info, user):
-    ''' check form data against name regex's 
-        create and save new drawing '''
-    #return httpresp('{}'.format(post_info.items()))
+    ''' check form data create and save new comment '''
     error = None
     new_com = {}
     for key, val in post_info.items():
@@ -591,22 +569,6 @@ def _add_new_comment(request, post_info, user):
         resp = httprespred(reverse('tracking:comment_detail',
                                    args=[comment.id]))
     return resp, error
-
-
-
-# @login_required
-# def comment_add(request):
-#     ''' unused view - for adding to arbitrary revision '''
-#     user = _get_user(request)
-#     error = None
-#     if request.method == 'POST':
-#         pass
-
-#     add_form = CommentAddForm(drawing_name=None, edit=False)
-
-#     context = {'form':add_form, 'drawing':None, 'is_edit':False, 
-#                'error':error, 'username':user}
-#     return render(request, 'tracking/comment_add.html', context)
 
 
 def _update_comment_info(com_id, post_info, user):
@@ -728,7 +690,6 @@ def _add_new_reply(request, post_info, user, com_id):
 
 @login_required
 def reply_edit(request, com_id, rep_no):
-    # return httpresp('Edit reply: {} on com: {}'.format(rep_no, com_id))
     user = _get_user(request)
 
     error = None
@@ -741,7 +702,6 @@ def reply_edit(request, com_id, rep_no):
             reply, comment, error = _update_reply_info(com_id, rep_no,
                                                post_info, user)
 
-    # else:
     edit_form = ReplyAddForm(edit=True)
 
     if not comment:
@@ -814,7 +774,6 @@ def add_attachment(request, item_type, item_id):
                     error = 'File too large. Please keey it under 10mb'
                 else:
                     return _store_attch(request, item_type, item_id, user)
-
         # else:
         #     print('form not valid')
 
@@ -859,9 +818,7 @@ def remove_attachment(request, item_type, item_id):
         remove_file_form = RemoveFileForm(item_type, item_id, request.POST, request.FILES)
         if remove_file_form.is_valid():
             info = remove_file_form.cleaned_data
-            # do something like _store_attch
             return _remove_attch(request, item_type, item_id, info)
-
         # else:
         #     print('form not valid')
 
@@ -893,5 +850,3 @@ def serve_attachment(request, file_type, file_id):
                         </br>Close this tab'''\
                         .format(ex, file_id))
 
-
-    

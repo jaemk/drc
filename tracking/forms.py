@@ -132,7 +132,6 @@ class ReplyAddForm(forms.Form):
             self.fields['text'].required = False
 
 
-
 class FileForm(forms.Form):
     newfile = forms.FileField(label='Select a file',
                               help_text='''<small>pdfs prefered<br/>
@@ -164,6 +163,3 @@ class RemoveFileForm(forms.Form):
                                        queryset=queryset,
                                        label='Select files to remove',
                                        help_text='<small>select multiple to delete</small>')
-
-
-

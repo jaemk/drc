@@ -31,7 +31,6 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^favicon\.ico$', lambda x: httprespred(os.path.join(settings.STATIC_URL, 
                                                               'images', 'favicon.ico'))),
-    # , tracking_views.login_view, name='login')
     url(r'^accounts/login',auth_views.login, {'template_name': 'tracking/login.html'}, name='login'),
     url(r'^accounts/logout', tracking_views.logout_view, name='logout'),
     url(r'^', include(tracking_urls)),
