@@ -649,19 +649,24 @@ def comment_edit(request, com_id):
 #---------------------  Reply Detail ------------------------
 @login_required
 def reply_detail(request, com_id, rep_no):
-
-    return httpresp('reply: {} on com: {}'.format(rep_no, com_id))
-
+    user = _get_user(request)
+    error = None
+    comment = Comment.objects.get(pk=com_id)
+    reply = Reply.objects.filter(comment=comment, number=rep_no).first()
+    rep_attch = ReplyAttachment.objects.filter(link=reply)
+    context = {'comment':comment, 'reply':reply,
+               'rep_attachments':rep_attch, 'error':error, 'username':user}
+    return render(request, 'tracking/reply_detail.html', context)
 
 
 @login_required
 def comment_reply_add(request, com_id):
-    pass
+    return httpresp('add reply on com: {}'.format(com_id))
 
 
 @login_required
 def reply_edit(request, com_id, rep_no):
-    pass
+    return httpresp('Edit reply: {} on com: {}'.format(rep_no, com_id))
 
 
 
@@ -751,14 +756,6 @@ def remove_attachment(request, item_type, item_id):
             info = remove_file_form.cleaned_data
             # do something like _store_attch
             return _remove_attch(request, item_type, item_id, info)
-            # return httpresp('{}'.format(', '.join([str(f) for f in info['files']])))
-
-            # return httpresp('{}'.format(','.join(['{}:{}'.format(k, v) for k, v in info.items()])))
-            # if 'newfile' in request.FILES:
-            #     if request.FILES['newfile']._size > 10 * 1024 * 1024: # size > 10mb
-            #         error = 'File too large. Please keey it under 10mb'
-            #     else:
-            #         return _store_attch(request, item_type, item_id, username)
 
         else:
             print('form not valid')
@@ -773,7 +770,7 @@ def remove_attachment(request, item_type, item_id):
 def serve_attachment(request, file_type, file_id):
     ''' Serve attachment for viewing or download '''
     attch = {'drawing':DrawingAttachment, 'revision':RevisionAttachment,
-             'comment':CommentAttachment, 'repy':ReplyAttachment}
+             'comment':CommentAttachment, 'reply':ReplyAttachment}
     try:
         attachment = attch[file_type].objects.get(pk=file_id)
         filepath = attachment.upload.name
@@ -788,7 +785,7 @@ def serve_attachment(request, file_type, file_id):
         return httpresp('''Error: {} <br/>
                         Unable to serve file:  file_id: {}
                         </br>Please notify James Kominick
-                        </br><a href="javascript:history.go(-1);">Return to prev</a>'''\
+                        </br>Close this tab'''\
                         .format(ex, file_id))
 
 

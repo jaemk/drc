@@ -1,0 +1,35 @@
+{% extends 'tracking/base.html' %}
+
+{% block content %}
+
+<h3> Reply by {{ reply.owner }} on 
+{% if comment %}
+<a href="{% url 'tracking:comment_detail' comment.id %}">{{ comment }}</a>
+{% endif %}
+</h3>
+
+<table class="info-table rev-table">
+    <col width="100">
+    <col width="300">
+    <caption><strong> -- Reply Info <a href="{% url 'tracking:reply_edit' com_id=comment.id rep_no=reply.number %}"><small> Edit </small></a> -- </strong></caption>
+    <tr><th> No. </th><td> {{ reply.number }} </td></tr>
+    <tr><th> Date </th><td> {{ reply.add_date|date:"m-d-Y" }} </td></tr>
+    <tr><th> Owner </th><td> {{ reply.owner }} </td></tr>
+    <tr><th> Description </th><td> {{ reply.desc }} </td></tr>
+    <tr><th> More Info </th><td> {{ reply.text}} </td></tr>
+    <tr><th> Attachments <a href="{% url 'tracking:add_attachment' item_type='reply' item_id=reply.id %} "><small> Add </a>|<a href="{% url 'tracking:remove_attachment' item_type='reply' item_id=reply.id %}"> Remove </small></a> </th><td>  
+    {% if rep_attachments %}
+    <ul>
+        {% for attch in rep_attachments %}
+        <li><a target="_blank" href="{% url 'tracking:serve_attachment' file_type='reply' file_id=attch.id %}">{{ attch.filename }}</a></li>
+        {% endfor %}
+    </ul>
+    {% else %}
+     No Attachments
+    {% endif %}
+    </td></tr>
+
+</table>
+
+
+{% endblock %}
