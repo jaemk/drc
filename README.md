@@ -3,7 +3,7 @@
 
 To replace the tracking list-ception of lists to track lists 
 
-├── drawings
+<!-- ├── drawings
 
 │   ├── revisions
 
@@ -14,5 +14,5 @@ To replace the tracking list-ception of lists to track lists
 │   │    │      │
 
 ...................
-
+ -->
 
