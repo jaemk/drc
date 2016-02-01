@@ -7,6 +7,11 @@
 <br/>
 <br/>
 
+{% if error %}
+Error: {{ error }}
+<br/>
+{% endif %}
+
 <form action="{% url 'tracking:add_attachment' item.type item.id %}" method="Post" enctype="multipart/form-data">
     {% csrf_token %}
         <table class="search-table">

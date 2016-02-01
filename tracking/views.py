@@ -766,6 +766,7 @@ def _store_attch(request, item_type, item_id, user):
 @login_required
 def add_attachment(request, item_type, item_id):
     user = _get_user(request)
+    error = None
     if request.method == 'POST':
         file_form = FileForm(request.POST, request.FILES)
         if file_form.is_valid():
@@ -779,7 +780,8 @@ def add_attachment(request, item_type, item_id):
 
     file_form = FileForm()
 
-    context = {'form':file_form, 'item':{'type':item_type, 'id':item_id}, 'username':user}
+    context = {'form':file_form, 'item':{'type':item_type, 'id':item_id},
+               'username':user, 'error':error}
     return render(request, 'tracking/attachment_add.html', context)
 
 
