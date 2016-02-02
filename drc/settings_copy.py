@@ -29,10 +29,9 @@ SECRET_KEY = 'oops'
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = True
 
-
 ## DEPLOY
 DEBUG = False
-# CSRF_COOKIE_SECURE = True
+## CSRF_COOKIE_SECURE = True
 X_FRAME_OPTIONS = 'DENY'
 
 ALLOWED_HOSTS = ['*']
@@ -41,6 +40,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    'session_security',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'tracking.apps.TrackingConfig',
+
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -59,6 +60,7 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'session_security.middleware.SessionSecurityMiddleware',
 ]
 
 ROOT_URLCONF = 'drc.urls'
@@ -74,6 +76,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.core.context_processors.request',
             ],
         },
     },
@@ -141,8 +144,10 @@ STATIC_URL = '/static/'
 
 # AutoLogout Time in minutes
 # AUTO_LOGOUT_DELAY = 10
-SESSION_COOKIE_AGE = 15 * 60
-
+# SESSION_COOKIE_AGE = 15 * 60
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_SECURITY_WARN_AFTER = 500
+SESSION_SECURITY_EXPIRE_AFTER = 600
 
 # Celery Settings
 BROKER_URL = 'redis://localhost:6379/0'

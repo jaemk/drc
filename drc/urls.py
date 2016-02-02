@@ -35,6 +35,7 @@ urlpatterns = [
     url(r'^accounts/logout', tracking_views.logout_view, name='logout'),
     url(r'^', include(tracking_urls)),
     url(r'^tracking/', include(tracking_urls)),
+    url(r'session_security/', include('session_security.urls')),
     
 ] + (static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT))
 
