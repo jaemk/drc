@@ -3,7 +3,7 @@
 {% block content %}
 
 <div>
-<h3> Drawing Detail: {{ drawing.name.upper }} </h3><small><a href="{% url 'tracking:subscribe_drawing' drawing_name=drawing.name go_to='drawing' %}"> {% if subscribed %}unsubscribe{% else %}subscribe{% endif %}</a></small>
+<h3> Drawing Detail: {{ drawing.name.upper }} </h3>Subscription: <a href="{% url 'tracking:subscribe_drawing' drawing_name=drawing.name go_to='drawing' %}"> {% if subscribed %} unsubscribe {% else %} subscribe {% endif %}</a>
 </div>
 <br/>
 <a href="{% url 'tracking:drawing_search' %}">Return to Drawing Search</a>
