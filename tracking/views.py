@@ -27,6 +27,7 @@ from .models import Comment
 from .models import CommentAttachment
 from .models import Reply
 from .models import ReplyAttachment
+from .models import DrawingSubscription
 
 from .forms import SearchForm
 from .forms import FileForm
@@ -150,10 +151,10 @@ def _pull_drawings(formdat):
 
     # Filter drawings based on drawing status
     if formdat['drawing_status']:
-        dquery = dquery.filter(status__status=formdat['drawing_status'])
+        dquery = dquery.filter(status__in=formdat['drawing_status'])
 
     # Filter drawing set based on drawing name regex
-    qstr = '^{}$'.format(formdat['drawing_name'].replace('*','.*'))
+    qstr = '^{}$'.format(formdat['drawing_name'].lower().replace('*','.*'))
     dquery = dquery.filter(name__regex=qstr).order_by('name')
     return dquery
 
@@ -188,7 +189,7 @@ def _get_drawing_detail(drawing_name):
                'phase':dwg.phase, 'block':block, 'received':dwg.received,
                'status':dwg.status, 'expected':dwg.expected,
                'department':dwg.department,  'discipline':dwg.discipline,
-               'kind':dwg.kind, 'attachments':dwg_attch, 'id':dwg.id}
+               'kind':dwg.kind, 'attachments':dwg_attch, 'id':dwg.id, 'dwg':dwg}
 
     revs = Revision.objects.filter(drawing=dwg).order_by('number')
     revisions = [{'id':rev.id,         'number':rev.number,
@@ -202,12 +203,17 @@ def _get_drawing_detail(drawing_name):
     return context
 
 
+def _check_subscription(user, drawing):
+    return DrawingSubscription.objects.filter(drawing=drawing, user=user).exists()
+
+
 @login_required
 def drawing_detail(request, drawing_name):
     ''' Fetch drawing details, and linked attachments, 
         revisions, comments, and replies'''
     user = _get_user(request)
     context = _get_drawing_detail(drawing_name)
+    context['subscribed'] = _check_subscription(user, context['drawing']['dwg'])
     context['username'] = user
     return render(request, 'tracking/drawing_detail.html', context)
 
@@ -737,6 +743,31 @@ def _update_reply_info(com_id, rep_no, post_info, user):
         reply.update(**info)
 
     return reply.first(), comment, error
+
+
+#---------------------------  Subscriptions -----------------------------
+@login_required
+def subscribe_drawing(request, drawing_name):
+    ''' toggle drawing subscriptions '''
+    user = _get_user(request)
+    drawing = Drawing.objects.get(name=drawing_name)
+    sub = DrawingSubscription.objects.filter(drawing=drawing, user=user)
+    if not sub.exists():
+        newsub = DrawingSubscription(drawing=drawing, user=user)
+        newsub.save()
+    elif sub.count() == 1:
+        sub.first().delete()
+
+    return httprespred(reverse('tracking:drawing_detail', args=[drawing_name]))
+
+
+@login_required
+def subscribed_drawings(request):
+    user = _get_user(request)
+    subs = DrawingSubscription.objects.filter(user=user)
+    context = {'username':user, 'subs':subs}
+    return render(request, 'tracking/subscribed_drawings.html', context)
+
 
 
 #----------------------  Attachments Add, Serve, Remove ------------------------

@@ -314,3 +314,24 @@ class ReplyAttachment(models.Model):
 
     def __str__(self):
         return 'Att: {}'.format(self.filename())
+
+
+class DrawingSubscription(models.Model):
+    drawing = models.ForeignKey(Drawing, on_delete=models.SET_NULL, 
+                                null=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL,
+                             related_name='subscriber',
+                             null=True)
+    last_mod_date = models.DateTimeField(null=True)
+    last_mod_by = models.ForeignKey(User, on_delete=models.SET_NULL,
+                                    related_name='mod_by',
+                                    blank=True, null=True)
+    mod_info = models.CharField(max_length=250, default='n/a')
+
+    def __repr__(self):
+        return '<Subscription: {} to {}>'.format(self.user.username,
+                                                 self.drawing.name)
+
+    def __str__(self):
+        return 'Subs: {} to {}'.format(self.user.username,
+                                       self.drawing.name)

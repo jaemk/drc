@@ -25,10 +25,14 @@ class SearchForm(forms.Form):
                                        widget=forms.CheckboxSelectMultiple,
                                        choices=(('open', 'Open'),
                                                 ('closed', 'Closed')))
-    drawing_status = forms.MultipleChoiceField(required=False,
-                                       widget=forms.CheckboxSelectMultiple,
-                                       choices=(('review', 'New/Review'),
-                                                ('approved', 'Final/Approved')))
+    drawing_status = forms.ModelMultipleChoiceField(required=False,
+                                                    queryset=DrawingStatus.objects.all(),
+                                                    to_field_name='status', 
+                                                    help_text='''<small>ctrl + click 
+                                                        to select multiple</small>''')
+                                       # widget=forms.CheckboxSelectMultiple,
+                                       # choices=(('review', 'New/Review'),
+                                       #          ('approved', 'Final/Approved')))
     project = forms.ModelChoiceField(queryset=Project.objects.all(),
                                       to_field_name='name', required=False)
     discipline = forms.ModelMultipleChoiceField(queryset=Discipline.objects.all(),
