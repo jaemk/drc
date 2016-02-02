@@ -1,0 +1,13 @@
+{% extends 'tracking/base.html' %}
+
+{% block content %}
+
+    <h3> Backup Dumping Menu </h3>
+    <!-- <br/> -->
+    <h3> Select Output: </h3>
+    <h5> Note: Extraction of database info may take a little while. Please do not click the links multiple times.</h5>
+    <h4><a href="{% url 'tracking:dump_data' dump_type='json' %}">Backup dump of database models (.json in a .zip)</a></h4>
+    <h4><a href="{% url 'tracking:dump_data' dump_type='csv' %}">CSV files for each database table (.csv's in a .zip)</a></h4>
+
+
+{% endblock %}

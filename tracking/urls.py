@@ -58,6 +58,9 @@ urlpatterns = [
     url(r'^attachment/remove/(?P<item_type>(drawing|revision|comment|reply))/(?P<item_id>[0-9_]+)/$',
         views.remove_attachment, name='remove_attachment'),
 
+    # Backup dumping
+    url(r'^backup/$', views.backup, name='backup'),
+    url(r'^backup/dump/(?P<dump_type>(json|csv))/$', views.dump_data, name='dump_data'),
     
     ]
 

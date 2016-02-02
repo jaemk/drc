@@ -224,9 +224,14 @@ def add_drawings():
             disc = Discipline.objects.get(name=info['discipline'][i]) if info['discipline'][i] else None
             kind = DrawingKind.objects.get(name=info['kind'][i]) if info['kind'][i] else None
             phase = Phase.objects.get(number=info['phase'][i]) if info['phase'][i] else None
+            if 'project' in info:
+                proj = Project.objects.get(name=info['project'][i]) if info['project'][i] else None
+            else:
+                proj = Project.objects.get(name='cv3600')
             new_dwg = Drawing(name=name,
                               desc=info['desc'][i] if info['desc'][i] else None,
                               phase=phase,
+                              project=proj,
                               #block=block,
                               status=status,
                               department=dep,

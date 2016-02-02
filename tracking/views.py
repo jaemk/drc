@@ -1,6 +1,9 @@
 import os
+import sys
 import re
 import mimetypes
+import subprocess
+from zipfile import ZipFile
 
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404 as get_or_404
@@ -935,3 +938,56 @@ def serve_attachment(request, file_type, file_id):
                         </br>Close this tab'''\
                         .format(ex, file_id))
 
+
+@login_required
+def backup(request):
+    ''' backup menu '''
+    if not request.user.is_superuser:
+        return httprespred(reverse('tracking:index'))
+    user = _get_user(request)
+    return render(request, 'tracking/dump_menu.html', {'username':user})
+
+
+@login_required
+def dump_data(request, dump_type):
+    ''' Dump database json to
+        /backup/user/ or /backup/auto '''
+    if not request.user.is_superuser:
+        return httprespred(reverse('tracking:index'))
+
+    if dump_type == 'json':
+        zip_name = 'data_user_json_dump.zip'
+        dump_name = 'data_user_dump.json'#.format(timezone.now().strftime('%m-%d-%Y-%S'))
+        dump_names = [dump_name]
+        dump_path = os.path.join(settings.BASE_DIR, 'backup', 'user', dump_name)
+        zip_path = os.path.join(settings.BASE_DIR, 'backup', 'user', zip_name)
+
+        subprocess.call([sys.executable, 'manage.py', 
+                        'dumpdata', '--indent', '2',
+                        '--verbosity', '0',
+                        '-o', dump_path], env=os.environ.copy())
+
+
+    else: #dump_type=='csv':
+        zip_name = 'data_user_csv_dump.zip'
+        zip_path = os.path.join(settings.BASE_DIR, 'backup', 'user', zip_name)
+        # do extraction and zipping
+        return httprespred(reverse('tracking:index'))
+
+    os.chdir(os.path.dirname(zip_path))
+    with ZipFile(zip_name, 'w') as zip_dump:
+        for item in dump_names:
+            zip_dump.write(item)
+    os.chdir(settings.BASE_DIR)
+
+    try:
+        with open(zip_path, 'rb') as dump:
+            response = httpresp(dump.read(), content_type=mimetypes.guess_type(zip_path)[0])
+            response['Content-Disposition'] = 'filename={}'.format(zip_name)
+            return response
+    except Exception as ex:
+        return httpresp('''Error: {} <br/>
+                        Unable to serve file: {}
+                        </br>Please notify James Kominick
+                        </br>Close this tab'''\
+                        .format(ex, zip_name))
