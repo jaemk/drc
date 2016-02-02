@@ -133,6 +133,10 @@ def _pull_drawings(formdat):
     if formdat['project']:
         dquery = dquery.filter(project=formdat['project'])
 
+    # Filter drawings by discipline
+    if formdat['discipline']:
+        dquery = dquery.filter(discipline__in=formdat['discipline'])
+
     # Filter drawings based on Department name
     if formdat['department_name']:
         exp = formdat['department_name'].strip().lower().replace('*','.*')
@@ -771,8 +775,8 @@ def add_attachment(request, item_type, item_id):
         file_form = FileForm(request.POST, request.FILES)
         if file_form.is_valid():
             if 'newfile' in request.FILES:
-                if request.FILES['newfile']._size > 10 * 1024 * 1024: # size > 10mb
-                    error = 'File too large. Please keey it under 10mb'
+                if request.FILES['newfile']._size > 5 * 1024 * 1024: # size > 5mb
+                    error = 'File too large. Please keey it under 5mb'
                 else:
                     return _store_attch(request, item_type, item_id, user)
         # else:

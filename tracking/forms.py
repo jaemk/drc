@@ -31,6 +31,10 @@ class SearchForm(forms.Form):
                                                 ('approved', 'Final/Approved')))
     project = forms.ModelChoiceField(queryset=Project.objects.all(),
                                       to_field_name='name', required=False)
+    discipline = forms.ModelMultipleChoiceField(queryset=Discipline.objects.all(),
+                                                to_field_name='name', required=False,
+                                                help_text='''<small>ctrl + click 
+                                                        to select multiple</small>''')
     block_name = forms.CharField(max_length=150, required=False)
     department_name = forms.CharField(max_length=150, required=False)
 
@@ -137,7 +141,8 @@ class FileForm(forms.Form):
                               help_text='''<small>pdfs prefered<br/>
                                            all formats accepted<br/>
                                            only single file upload per 
-                                           submission</small>''')
+                                           submission<br/>
+                                           5MB Limit</small>''')
 
 
 def _get_file_set(item_type, item_id):
