@@ -15,8 +15,8 @@ urlpatterns = [
     url(r'^search/open_comments/$', views.open_comment_search, name='open_comments'),
     url(r'^comment/toggle/(?P<com_id>[0-9_]+)/$', views.toggle_comment, name='toggle_comment'),
     url(r'^subscriptions/$', views.subscribed_drawings, name='subscribed_drawings'),
-    url(r'^subscribe/drawing/toggle/(?P<drawing_name>[a-zA-Z0-9_-]+)/$', views.subscribe_drawing,
-        name='subscribe_drawing'),
+    url(r'^subscribe/drawing/toggle/(?P<drawing_name>[a-zA-Z0-9_-]+)/next/(?P<go_to>(drawing|list))/$',
+        views.subscribe_drawing, name='subscribe_drawing'),
 
     # Drawing (detail, edit, add)
     url(r'^drawing/(?P<drawing_name>[a-zA-Z0-9_-]+)/$',

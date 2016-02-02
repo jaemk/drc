@@ -195,7 +195,8 @@ def _get_drawing_detail(drawing_name):
     revisions = [{'id':rev.id,         'number':rev.number,
                   'date':rev.add_date, 'desc':rev.desc} for rev in revs]
 
-    coms = Comment.objects.filter(revision__in=revs).order_by('-status')
+    coms = Comment.objects.filter(revision__in=revs).order_by('-status','id')\
+                                                    .distinct()
     comments = coms
 
     context = {'drawing':drawing, 'revisions':revs,
@@ -747,7 +748,7 @@ def _update_reply_info(com_id, rep_no, post_info, user):
 
 #---------------------------  Subscriptions -----------------------------
 @login_required
-def subscribe_drawing(request, drawing_name):
+def subscribe_drawing(request, drawing_name, go_to):
     ''' toggle drawing subscriptions '''
     user = _get_user(request)
     drawing = Drawing.objects.get(name=drawing_name)
@@ -758,7 +759,10 @@ def subscribe_drawing(request, drawing_name):
     elif sub.count() == 1:
         sub.first().delete()
 
-    return httprespred(reverse('tracking:drawing_detail', args=[drawing_name]))
+    if go_to == 'drawing':
+        return httprespred(reverse('tracking:drawing_detail', args=[drawing_name]))
+    elif go_to == 'list':
+        return httprespred(reverse('tracking:subscribed_drawings'))
 
 
 @login_required
