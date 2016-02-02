@@ -291,7 +291,8 @@ class Reply(models.Model):
         return '<Reply: {} on com. {}>'.format(self.id, self.comment)
 
     def __str__(self):
-        return 'Reply to: {}'.format(self.comment)
+        return 'Reply({}) to: {}'.format(self.number, self.comment)
+
 
 class ReplyAttachment(models.Model):
     upload = models.FileField(upload_to=drawing_upload_path,

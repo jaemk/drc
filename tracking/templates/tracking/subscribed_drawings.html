@@ -12,13 +12,14 @@
     <col width="100">
     <col width="100">
     <col width="120">
-    <col width="200">
+    <col width="150">
+    <col width="500">
     <caption><strong> -- Your Subscriptions -- </strong></caption>
     <tr><th> Drawing </th><th>Subscr.</th><th> Date Last Mod </th><th> Last Mod By </th><th> Mod Info </th></tr>
     {% if subs %}
         {% for sub in subs %}
         <tr><td><a href="{% url 'tracking:drawing_detail' drawing_name=sub.drawing.name %}">{{ sub.drawing.name }} </a></td>
-        <td><small><a href="{% url 'tracking:subscribe_drawing' drawing_name=sub.drawing.name go_to='list' %}">unsubscribe</a></small></td>
+        <td><small><a href="{% url 'tracking:subscribe_drawing' drawing_name=sub.drawing.name go_to='list' %}">unsub</a></small></td>
         {% if not sub.last_mod_date %}
         <td colspan="3"><small>No modification since subscribing</small></td>
         {% else %}

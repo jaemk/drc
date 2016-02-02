@@ -254,6 +254,9 @@ def _update_drawing_info(drawing_name, post_info, user):
         newname = None
         if 'name' in info:
             newname = info['name']
+            drawing_name = newname
+        _update_subscriptions(drawing_name=drawing_name, mod_date=info['mod_date'],
+                              mod_by=info['mod_by'], mod_info='edit drawing {}'.format(drawing_name))
         return newname, error
 
     return None, error
@@ -397,6 +400,11 @@ def _update_revision_info(drawing_name, rev_no, post_info, user):
         new_rev = None
         if 'number' in info:
             new_rev = info['number']
+            rev_no = new_rev
+
+        _update_subscriptions(drawing=drawing, mod_date=info['mod_date'],
+                              mod_by=info['mod_by'],
+                              mod_info='edit rev {}-{}'.format(drawing_name, rev_no))
         return new_rev, drawing, error
 
     return None, None, error
@@ -439,6 +447,7 @@ def drawing_revision_add(request, drawing_name):
 
     add_form = RevisionAddForm(drawing_name=drawing_name, edit=False)
     drawing = Drawing.objects.get(name=drawing_name)
+
     context = {'form':add_form, 'drawing':drawing, 'is_edit':False, 
                'error':error, 'username':user}
     return render(request, 'tracking/revision_add.html', context)
@@ -477,6 +486,10 @@ def _add_new_revision(request, post_info, user):
         new_rev['mod_by'] = user
         revision = Revision(**new_rev)
         revision.save()
+        _update_subscriptions(drawing=revision.drawing, mod_date=new_rev['mod_date'],
+                              mod_by=new_rev['mod_by'],
+                              mod_info='new rev {}-{}'.format(revision.drawing.name,
+                                                              revision.number))
         resp = httprespred(reverse('tracking:revision_detail',
                                    args=[revision.drawing.name,
                                          revision.number]))
@@ -537,7 +550,8 @@ def drawing_comment_add(request, drawing_name):
             if not error:
                 return resp
 
-    add_form = CommentAddForm(drawing_name=drawing_name, edit=False)
+    else:
+        add_form = CommentAddForm(drawing_name=drawing_name, edit=False)
 
     drawing = Drawing.objects.get(name=drawing_name)
     revisions = Revision.objects.filter(drawing=drawing)
@@ -577,6 +591,10 @@ def _add_new_comment(request, post_info, user):
             comment.revision.add(rev)
             comment.save()
 
+        _update_subscriptions(drawing=revs[0].drawing, mod_date=new_com['mod_date'],
+                              mod_by=new_com['mod_by'],
+                              mod_info='new comment({}) on {}'.format(comment.id,
+                                                                      revs[0]))
         resp = httprespred(reverse('tracking:comment_detail',
                                    args=[comment.id]))
     return resp, error
@@ -609,6 +627,11 @@ def _update_comment_info(com_id, post_info, user):
         info['mod_date'] = timezone.now()
         info['mod_by'] = user
         comment.update(**info)
+        rev = comment.first().revision.first()
+        _update_subscriptions(drawing=rev.drawing, mod_date=info['mod_date'],
+                              mod_by=info['mod_by'],
+                              mod_info='edit comment({}) on {}'.format(comment.first().id,
+                                                                       rev))
 
     return comment.first(), error
 
@@ -660,8 +683,8 @@ def comment_reply_add(request, com_id):
             resp, error  = _add_new_reply(request, post_info, user, com_id)
             if not error:
                 return resp
-
-    add_form = ReplyAddForm(edit=False)
+    else:
+        add_form = ReplyAddForm(edit=False)
 
     comment = Comment.objects.get(pk=com_id)
     reply = None
@@ -694,6 +717,12 @@ def _add_new_reply(request, post_info, user, com_id):
         reply = Reply(**new_rep)
         reply.save()
 
+        rev = comment.revision.first()
+        _update_subscriptions(drawing=rev.drawing, mod_date=new_rep['mod_date'],
+                              mod_by=new_rep['mod_by'],
+                              mod_info='add reply({}) on {}'.format(reply.number,
+                                                                    comment))
+
         resp = httprespred(reverse('tracking:reply_detail',
                                    args=[comment.id, new_rep['number']]))
     return resp, error
@@ -712,8 +741,8 @@ def reply_edit(request, com_id, rep_no):
             post_info = edit_form.cleaned_data
             reply, comment, error = _update_reply_info(com_id, rep_no,
                                                post_info, user)
-
-    edit_form = ReplyAddForm(edit=True)
+    else:
+        edit_form = ReplyAddForm(edit=True)
 
     if not comment:
         comment = Comment.objects.get(pk=com_id)
@@ -743,6 +772,12 @@ def _update_reply_info(com_id, rep_no, post_info, user):
         info['mod_by'] = user
         reply.update(**info)
 
+        rev = comment.revision.first()
+        _update_subscriptions(drawing=rev.drawing, mod_date=info['mod_date'],
+                              mod_by=info['mod_by'],
+                              mod_info='edit reply({}) on {}'.format(reply.first().number,
+                                                                     comment))
+
     return reply.first(), comment, error
 
 
@@ -768,10 +803,19 @@ def subscribe_drawing(request, drawing_name, go_to):
 @login_required
 def subscribed_drawings(request):
     user = _get_user(request)
-    subs = DrawingSubscription.objects.filter(user=user)
+    subs = DrawingSubscription.objects.filter(user=user).order_by('last_mod_date')
     context = {'username':user, 'subs':subs}
     return render(request, 'tracking/subscribed_drawings.html', context)
 
+
+def _update_subscriptions(drawing=None, drawing_name=None,
+                          mod_date=None, mod_by=None, mod_info=None):
+    if drawing:
+        subs = DrawingSubscription.objects.filter(drawing=drawing)
+    else:
+        subs = DrawingSubscription.objects.filter(drawing__name=drawing_name)
+    info = {'last_mod_date':mod_date, 'last_mod_by':mod_by, 'mod_info':mod_info}
+    subs.update(**info)
 
 
 #----------------------  Attachments Add, Serve, Remove ------------------------

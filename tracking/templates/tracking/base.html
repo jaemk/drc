@@ -12,29 +12,43 @@
     <body>
 
         <div id="header">
-            <div>
-                <h1 style="margin-left:10px;"><a href="/tracking/">  DRC </a></h1>
-            </div>
-            <div>
-                <p style='text-align:left; margin-left:10px; margin-right:10px'>
-                <!-- <a href='/tracking/'>Drawings </a> |
-                <a href='/tracking/'> Revisions </a> | 
-                <a href='/tracking/'> Comments </a> | 
-                <a href='/'> Home </a> -->
-                <strong>Drawing - Revision - Comment -- Tracking</strong>
-                    <span style='float:right'>        
-                        <a href='/accounts/login?next=/tracking/'> Login </a> | 
-                        <a href='/accounts/logout'> Logout</a>
-                        <br/>
-                        {% if username  %}
-                            Logged in as: {{ username }}
-                        {% else %}
-                            Not logged in
-                        {% endif %}
-                    </span>
-                </p>
-                {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-            </div>
+            <table width="97%" style="margin-left:10px;">
+            <tr>
+                <td style="text-align: left;">
+                    <h1 ><a href="/tracking/"> DRC </a></h1>
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: left;">
+                <!-- <p style='text-align:left; margin-left:10px; margin-right:10px'> -->
+                    <strong> Drawing - Revision - Comment -- Tracking</strong>
+                </td>
+                <td style="text-align: right;">
+                    <strong>
+                    <a href='/accounts/login?next=/tracking/'> Login </a> | 
+                    <a href='/accounts/logout'> Logout</a>
+                    </strong>
+                </td>
+            <tr>
+                <td style="text-align: left;">
+                    <strong>
+                    <a href='/tracking/subscriptions/'> Subscriptions </a> | 
+                    <a href='/tracking/search/open_comments/'> Open Comments </a>
+                    </strong>
+                </td>
+                <td style="text-align: right;">
+                    {% if username  %}
+                        Logged in as: {{ username }}
+                    {% else %}
+                        Not logged in
+                    {% endif %}
+                </td>
+            </tr>
+
+            </table>
+
+            {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
         </div>
 
         <div id="content">
