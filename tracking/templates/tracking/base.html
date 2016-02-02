@@ -27,6 +27,7 @@
                 <td style="text-align: right;">
                     <strong>
                     {% if request.user.is_superuser %}
+                    <a href='/backup/'>Backup </a> | 
                     <a href='/admin/'>Admin </a> | 
                     {% endif %}
                     <a href='/accounts/login?next=/tracking/'> Login </a> | 
