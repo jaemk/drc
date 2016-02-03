@@ -40,10 +40,12 @@
 {% endif %}
 
 {% if error %}
+<strong>
     Error: {{ error }}
     <br/>
     <a href="javascript:history.go(-1);">
                        Return to prev</a>
+                       </strong>
 {% endif %}
 
 {% if is_edit %}
@@ -66,7 +68,7 @@
     {% if is_edit %}
         <p><input type="submit" value="Submit Changes & Overwrite Existing"/></p>
     {% else %}
-        <p><input type="submit" value="Submit New Revision Info"/></p>
+        <p><input type="submit" value="Submit New Comment Info"/></p>
     {% endif %}
 </form>
 

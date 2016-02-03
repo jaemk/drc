@@ -97,9 +97,10 @@ def toggle_comment(request, com_id):
     if comment.owner == user or comment.owner == None:
         comment.status = not comment.status
         comment.save()
+        com_stat = 'open' if comment.status else 'closed'
         _update_subscriptions(drawing=comment.revision.first().drawing, mod_date=timezone.now(),
                               mod_by=user,
-                              mod_info='{} changed status on comment({})'.format(user, comment.id))
+                              mod_info='changed comment({}) status to {}'.format(comment.id, com_stat))
 
     return httprespred(reverse('tracking:comment_detail', args=[com_id]))
 
@@ -266,7 +267,7 @@ def _update_drawing_info(drawing_name, post_info, user):
             newname = info['name']
             drawing_name = newname
         _update_subscriptions(drawing_name=drawing_name, mod_date=info['mod_date'],
-                              mod_by=info['mod_by'], mod_info='edit drawing {}'.format(drawing_name))
+                              mod_by=info['mod_by'], mod_info='edit drawing {}'.format(drawing_name.upper()))
         return newname, error
 
     return None, error
@@ -414,7 +415,7 @@ def _update_revision_info(drawing_name, rev_no, post_info, user):
 
         _update_subscriptions(drawing=drawing, mod_date=info['mod_date'],
                               mod_by=info['mod_by'],
-                              mod_info='edit rev {}-{}'.format(drawing_name, rev_no))
+                              mod_info='edit rev {}-{}'.format(drawing_name.upper(), rev_no))
         return new_rev, drawing, error
 
     return None, None, error
@@ -478,7 +479,7 @@ def _add_new_revision(request, post_info, user):
                 break
             if Revision.objects.filter(number=new_rev[key],
                                        drawing=post_info['drawing']).exists():
-                error = 'Drawing already exists...'
+                error = 'Revision already exists...'
                 break
         elif key == 'desc':
             new_rev[key] = val.lower()
@@ -498,8 +499,8 @@ def _add_new_revision(request, post_info, user):
         revision.save()
         _update_subscriptions(drawing=revision.drawing, mod_date=new_rev['mod_date'],
                               mod_by=new_rev['mod_by'],
-                              mod_info='new rev {}-{}'.format(revision.drawing.name,
-                                                              revision.number))
+                              mod_info='new rev {}-{}'.format(revision.drawing.name.upper(),
+                                                              revision.number.upper()))
         resp = httprespred(reverse('tracking:revision_detail',
                                    args=[revision.drawing.name,
                                          revision.number]))
@@ -519,7 +520,7 @@ def revision_add(request):
                 return resp
         else:
             error = '''Missing Requried Fields.
-                       Return to prev. page for drawing field to re-filter'''
+                       Return to previous page for drawing field to re-auto-filter'''
     else:
         add_form = RevisionAddForm(drawing_name=None, edit=False)
 
@@ -976,7 +977,7 @@ def _extract_to_csv(zip_name, zip_path):
                                         .replace('\t','_'))
                     else:
                         try:
-                            items.append(line.__dict__[key].strftime('%m-%d-%Y-%S'))
+                            items.append(line.__dict__[key].strftime('%m-%d-%Y'))
                         except:
                             items.append(str(line.__dict__[key]).replace('\n','_')\
                                         .replace('\t','_'))

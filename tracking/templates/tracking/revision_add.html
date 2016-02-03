@@ -26,10 +26,12 @@
 {% endif %}
 
 {% if error %}
+<strong>
     Error: {{ error }}
     <br/>
     <a href="javascript:history.go(-1);">
                        Return to prev</a>
+</strong>
 {% endif %}
 
 {% if is_edit %}
