@@ -18,6 +18,9 @@ body.loading .modal {
         display: block;
 }
 
+body {
+  font-family: Calibri;
+}
 
 h1 {
     margin:0;
@@ -27,7 +30,7 @@ h1 {
 #header {
     margin: 0;
     height: 95px;
-    background: #d3ac5f;
+    background: #F3AD35;
 }
 
 
