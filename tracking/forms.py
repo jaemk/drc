@@ -1,5 +1,6 @@
 from django import forms
-# from django.contrib.admin.widgets import AdminDateWidget
+import datetime
+
 from .models import Project
 from .models import Phase
 from .models import Block
@@ -15,7 +16,6 @@ from .models import DrawingAttachment
 from .models import RevisionAttachment
 from .models import CommentAttachment
 from .models import ReplyAttachment
-import datetime
 
 
 class SearchForm(forms.Form):
@@ -35,7 +35,7 @@ class SearchForm(forms.Form):
                                        #          ('approved', 'Final/Approved')))
     project = forms.ModelChoiceField(queryset=Project.objects.all(),
                                       to_field_name='name', required=False)
-    discipline = forms.ModelMultipleChoiceField(queryset=Discipline.objects.all(),
+    discipline = forms.ModelMultipleChoiceField(queryset=Discipline.objects.all().order_by('name'),
                                                 to_field_name='name', required=False,
                                                 help_text='''<small>ctrl + click 
                                                         to select multiple</small>''')
@@ -46,29 +46,29 @@ class SearchForm(forms.Form):
 class DrawingAddForm(forms.Form):
     name = forms.CharField(max_length=250, required=True)
     desc = forms.CharField(max_length=500, required=False)
-    phase = forms.ModelChoiceField(queryset=Phase.objects.all(),
+    phase = forms.ModelChoiceField(queryset=Phase.objects.all().order_by('number'),
                                    to_field_name='number', required=False)
     received = forms.ChoiceField(required=False,
                                          widget=forms.Select,
                                          choices=((None, '--'),
                                                   ('no', 'No'),
                                                   ('yes' , 'Yes')))
-    project = forms.ModelChoiceField(queryset=Project.objects.all(), 
+    project = forms.ModelChoiceField(queryset=Project.objects.all().order_by('name'), 
                                      to_field_name='name', required=False)
     block = forms.ModelMultipleChoiceField(queryset=Block.objects.all(),
                                            to_field_name='name', required=False,
                                            help_text='''<small>ctrl+click 
                                                         to select multiple</small>''')
-    status = forms.ModelChoiceField(queryset=DrawingStatus.objects.all(),
+    status = forms.ModelChoiceField(queryset=DrawingStatus.objects.all().order_by('status'),
                                     to_field_name='status', required=False)
     expected = forms.DateField(widget=forms.SelectDateWidget(
                                             empty_label=('Year', 'Month', 'Day')),
                                             required=False)
-    department = forms.ModelChoiceField(queryset=Department.objects.all(),
+    department = forms.ModelChoiceField(queryset=Department.objects.all().order_by('name'),
                                         to_field_name='name', required=False)
-    discipline = forms.ModelChoiceField(queryset=Discipline.objects.all(),
+    discipline = forms.ModelChoiceField(queryset=Discipline.objects.all().order_by('name'),
                                         to_field_name='name', required=False)
-    kind = forms.ModelChoiceField(queryset=DrawingKind.objects.all(),
+    kind = forms.ModelChoiceField(queryset=DrawingKind.objects.all().order_by('name'),
                                     to_field_name='name', required=False)
 
     def __init__(self, edit=False, *args, **kwargs):

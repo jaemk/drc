@@ -31,6 +31,10 @@ from .models import CommentAttachment
 from .models import Reply
 from .models import ReplyAttachment
 from .models import DrawingSubscription
+ALL_MODELS = [Block, DrawingStatus, Department, Drawing, 
+              DrawingAttachment, Revision, RevisionAttachment,
+              Comment, CommentAttachment, Reply, ReplyAttachment,
+              DrawingSubscription]
 
 from .forms import SearchForm
 from .forms import FileForm
@@ -942,6 +946,7 @@ def serve_attachment(request, file_type, file_id):
                         .format(ex, file_id))
 
 
+#----------------------  Backups Process, Serve ------------------------
 @login_required
 def backup(request):
     ''' backup menu '''
@@ -951,17 +956,35 @@ def backup(request):
     return render(request, 'tracking/dump_menu.html', {'username':user})
 
 
+def _extract_to_csv(zip_name, zip_path):
+    folder = os.path.dirname(zip_path)
+    os.chdir(folder)
+    files = []
+    for table in ALL_MODELS:
+        name = table.__name__
+        files.append(name+'.csv')
+        info = table.objects.all()
+        keys = [k for k in info[0].__dict__.keys() if not k.startswith('_')]
+        with open('{}.csv'.format(name), 'w') as fout:
+            fout.write(','.join(keys)+'\n')
+            for line in info:
+                fout.write(','.join([str(line.__dict__[key]).replace('\n','_')\
+                                        .replace('\t','_')
+                                        for key in keys])+'\n')
+    os.chdir(settings.BASE_DIR)
+    return files
+                
+
 @login_required
 def dump_data(request, dump_type):
     ''' Dump database json to
         /backup/user/ or /backup/auto '''
-    print('dumping')
     if not request.user.is_superuser:
         return httprespred(reverse('tracking:index'))
-    print('passes')
+
     if dump_type == 'json':
         zip_name = 'data_user_json_dump.zip'
-        dump_name = 'data_user_dump.json'#.format(timezone.now().strftime('%m-%d-%Y-%S'))
+        dump_name = 'data_user_dump.json'
         dump_names = [dump_name]
         dump_path = os.path.join(settings.BASE_DIR, 'backup', 'user', dump_name)
         zip_path = os.path.join(settings.BASE_DIR, 'backup', 'user', zip_name)
@@ -971,12 +994,10 @@ def dump_data(request, dump_type):
                         '--verbosity', '0',
                         '-o', dump_path], env=os.environ.copy())
 
-
     else: #dump_type=='csv':
         zip_name = 'data_user_csv_dump.zip'
         zip_path = os.path.join(settings.BASE_DIR, 'backup', 'user', zip_name)
-        # do extraction and zipping
-        return httprespred(reverse('tracking:index'))
+        dump_names = _extract_to_csv(zip_name, zip_path)
 
     os.chdir(os.path.dirname(zip_path))
     with ZipFile(zip_name, 'w') as zip_dump:
