@@ -968,9 +968,24 @@ def _extract_to_csv(zip_name, zip_path):
         with open('{}.csv'.format(name), 'w') as fout:
             fout.write(','.join(keys)+'\n')
             for line in info:
-                fout.write(','.join([str(line.__dict__[key]).replace('\n','_')\
-                                        .replace('\t','_')
-                                        for key in keys])+'\n')
+                items = []
+                for key in keys:
+                    # have to reformat the date -_-
+                    if 'date' not in key:
+                        items.append(str(line.__dict__[key]).replace('\n','_')\
+                                        .replace('\t','_'))
+                    else:
+                        try:
+                            items.append(line.__dict__[key].strftime('%m-%d-%Y-%S'))
+                        except:
+                            items.append(str(line.__dict__[key]).replace('\n','_')\
+                                        .replace('\t','_'))
+
+                fout.write(','.join(items)+'\n')
+                # fout.write(','.join([str(line.__dict__[key]).replace('\n','_')\
+                #                         .replace('\t','_')
+                #                         for key in keys])+'\n')
+
     os.chdir(settings.BASE_DIR)
     return files
                 
