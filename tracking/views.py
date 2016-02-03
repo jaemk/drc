@@ -952,9 +952,10 @@ def backup(request):
 def dump_data(request, dump_type):
     ''' Dump database json to
         /backup/user/ or /backup/auto '''
+    print('dumping')
     if not request.user.is_superuser:
         return httprespred(reverse('tracking:index'))
-
+    print('passes')
     if dump_type == 'json':
         zip_name = 'data_user_json_dump.zip'
         dump_name = 'data_user_dump.json'#.format(timezone.now().strftime('%m-%d-%Y-%S'))
@@ -984,6 +985,7 @@ def dump_data(request, dump_type):
         with open(zip_path, 'rb') as dump:
             response = httpresp(dump.read(), content_type=mimetypes.guess_type(zip_path)[0])
             response['Content-Disposition'] = 'filename={}'.format(zip_name)
+            response['Set-Cookie'] = 'fileDownload=true; path=/'
             return response
     except Exception as ex:
         return httpresp('''Error: {} <br/>
