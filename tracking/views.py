@@ -93,6 +93,9 @@ def toggle_comment(request, com_id):
     if comment.owner == user or comment.owner == None:
         comment.status = not comment.status
         comment.save()
+        _update_subscriptions(drawing=comment.revision.first().drawing, mod_date=timezone.now(),
+                              mod_by=user,
+                              mod_info='{} changed status on comment({})'.format(user, comment.id))
 
     return httprespred(reverse('tracking:comment_detail', args=[com_id]))
 
