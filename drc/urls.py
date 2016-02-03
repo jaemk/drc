@@ -28,14 +28,15 @@ from tracking import urls as tracking_urls
 from tracking import views as tracking_views
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
-    url(r'^favicon\.ico$', lambda x: httprespred(os.path.join(settings.STATIC_URL, 
+    url(r'^drc/admin/', admin.site.urls, name='admin'),
+    url(r'^drc/favicon\.ico$', lambda x: httprespred(os.path.join(settings.STATIC_URL, 
                                                               'images', 'favicon.ico'))),
-    url(r'^accounts/login',auth_views.login, {'template_name': 'tracking/login.html'}, name='login'),
-    url(r'^accounts/logout', tracking_views.logout_view, name='logout'),
+    url(r'^drc/accounts/login',auth_views.login, {'template_name': 'tracking/login.html'}, name='login'),
+    url(r'^drc/accounts/logout', tracking_views.logout_view, name='logout'),
+    url(r'^drc/', include(tracking_urls)),
     url(r'^', include(tracking_urls)),
-    url(r'^tracking/', include(tracking_urls)),
-    url(r'session_security/', include('session_security.urls')),
+    url(r'^drc/tracking/', include(tracking_urls)),
+    url(r'drc/session_security/', include('session_security.urls')),
     
 ] + (static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT))
 

@@ -2,7 +2,7 @@
 <html>
     <head>
        <!--  <title> DRC Tracking </title> -->
-        <link rel="icon" href="/static/images/favicon.ico?"/>
+        <link rel="icon" href="{% static 'images/favicon.ico?' %}"/>
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
 
@@ -22,7 +22,7 @@
             <table width="97%" style="margin-left:10px;">
             <tr>
                 <td style="text-align: left;">
-                    <h1 ><a href="/tracking/"> DRC </a></h1>
+                    <h1 ><a href="{% url 'tracking:index' %}"> DRC </a></h1>
                 </td>
             </tr>
             <tr>
@@ -33,18 +33,18 @@
                 <td style="text-align: right;">
                     <strong>
                     {% if request.user.is_superuser %}
-                    <a href='/backup/'>Backup </a> | 
-                    <a href='/admin/'>Admin </a> | 
+                    <a href="{% url 'tracking:backup' %}">Backup </a> | 
+                    <a href="/drc/admin">Admin </a> | 
                     {% endif %}
-                    <a href='/accounts/login?next=/tracking/'> Login </a> | 
-                    <a href='/accounts/logout'> Logout</a>
+                    <a href="{% url 'login' %}"> Login </a> | 
+                    <a href="{% url 'logout' %}"> Logout</a>
                     </strong>
                 </td>
             <tr>
                 <td style="text-align: left;">
                     <strong>
-                    <a href='/tracking/subscriptions/'>Subscriptions </a> | 
-                    <a href='/tracking/search/open_comments/'> Open Comments </a>
+                    <a href="{% url 'tracking:subscriptions' %}">Subscriptions </a> | 
+                    <a href="{% url 'tracking:open_comments' %}"> Open Comments </a>
                     </strong>
                 </td>
                 <td style="text-align: right;">

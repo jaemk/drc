@@ -13,7 +13,7 @@
         <td>
 
 <div id='login'>
-    <form class='form-horizontal' name='LoginForm' action='/accounts/login?next=/tracking/' method='post'>
+    <form class='form-horizontal' name='LoginForm' action="{% url 'login' %}" method='post'>
         {% csrf_token %}
 
         <div class='control-group'>
