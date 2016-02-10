@@ -19,15 +19,17 @@ body.loading .modal {
 }
 
 body {
-  font-family: Calibri;
+    padding-top: 60px;
+    font-family:Tahoma, Geneva, sans-serif;
+    font-size:14px;
 }
 
-h1 {
+/*h1 {
     margin:0;
 }
+*/
 
-
-#header {
+/*#header {
     margin: 0;
     height: 95px;
     background: #F3AD35;
@@ -36,7 +38,6 @@ h1 {
 
 #content {
     padding-bottom: 50px;
-    /*position: relative;*/
     min-height: 100%
 }
 
@@ -47,18 +48,27 @@ h1 {
     position: absolute;
     bottom: 0;
     left: 0;
-    /*position: relative;*/
-    /*margin: -7.5em auto 0 auto;*/
     background: #d3ac5f;
 }
-
-
+*/
+/*
 #login-table {
     margin: 0 auto;
     margin-top: 20px; 
     border: 1px solid gray;
+}*/
+
+.center-table {
+    margin: 0 auto !important;
+    float: none !important;
 }
 
+.full-table {
+    margin-top:10px;
+    margin-right: 100px;
+    margin-left: 20px;
+    overflow: auto;
+}
 
 .info-table {
     border:1px solid black;
