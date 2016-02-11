@@ -24,39 +24,41 @@ body {
     font-size:14px;
 }
 
-/*h1 {
-    margin:0;
+.navbar {
+    background: #5f9aa4;
 }
-*/
-
-/*#header {
-    margin: 0;
-    height: 95px;
-    background: #F3AD35;
+.navbar .navbar-brand {
+    color: #FFF;
 }
-
-
-#content {
-    padding-bottom: 50px;
-    min-height: 100%
+.navbar .navbar-nav > li > a {
+    color: #FFF;
+}
+.navbar .navbar-brand:hover {
+    background: #FFF;
 }
 
-
-#footer {
-    width: 100%;
-    height: 50px;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    background: #d3ac5f;
+#link-list {
+    width:15em;
 }
-*/
-/*
-#login-table {
-    margin: 0 auto;
-    margin-top: 20px; 
-    border: 1px solid gray;
-}*/
+
+#id-link {
+    text-align: left;
+    /*width:3.5em;
+    height:2.5em;*/
+}
+#id-link:hover {
+    background: #5F9aa4;
+    color: #FFF;
+}
+
+.flat-button {
+    background: #FFF;
+}
+.flat-button:hover {
+    background: #5f9aa4;
+    color: #FFF;
+}
+
 
 .center-table {
     margin: 0 auto !important;
@@ -69,6 +71,9 @@ body {
     margin-left: 20px;
     overflow: auto;
 }
+
+
+
 
 .info-table {
     border:1px solid black;
