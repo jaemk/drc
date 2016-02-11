@@ -6,31 +6,46 @@
     <h3> Open Comments </h3>
 </div>
 
-    <a href="{% url 'tracking:index' %}">Return to Home</a>
-    
+    <a id="back-link" class="list-group-item" href="{% url 'tracking:index' %}">
+        <span class="glyphicon glyphicon-chevron-left"></span>
+        Back to Home
+    </a>
     <br/>
-    <br/>
 
-    <table class="info-table table-hover table-condensed table-bordered">
-<!--     <col width="50">
-    <col width="100">
-    <col width="120">
-    <col width="200">
-    <col width="500">
-    <col width="100"> -->
-    <caption><strong> -- Open Comments -- </strong></caption>
-    <tr><th> ID </th><th> Date </th><th> Owner </th><th> Description </th><th> On Revs </th><th>No. Replies</th></tr>
-    {% if comments %}
-        {% for com in comments %}
-        <tr><td><a id="id-link" class="list-group-item" href="{% url 'tracking:comment_detail' com_id=com.id %}">{{ com.id }} </a></td><td>{{com.add_date|date:"m-d-Y" }}</td><td>{{ com.owner }}</td><td>{{ com.desc }}</td><td>{{ com.revisions }}</td><td>{{ com.number_replies }}</tr>
-        {% endfor %}
+<div class="panel panel-default">
+    <div id="flat-panel" class="panel-heading"> Open Comments </div>
 
-    {% else %}
-    <tr><td colspan="6" style="text-align:center"><strong> No Open Comments </strong></td></tr>
-
-    {% endif %}
-    </table>
-
+    <div class="table-responsive">
+        <table class="table table-hover table-condensed table-bordered">
+        <col width="1">
+        <tr>
+            <th> ID </th>
+            <th> Date </th>
+            <th> Owner </th>
+            <th> Description </th>
+            <th> On Revs </th>
+            <th>No. Replies</th>
+        </tr>
+        {% if comments %}
+            {% for com in comments %}
+                <tr>
+                    <td><a id="id-link" class="list-group-item" href="{% url 'tracking:comment_detail' com_id=com.id %}">
+                    {{ com.id }} </a></td>
+                    <td>{{com.add_date|date:"m-d-Y" }}</td>
+                    <td>{{ com.owner }}</td>
+                    <td>{{ com.desc }}</td>
+                    <td>{{ com.revisions }}</td>
+                    <td>{{ com.number_replies }} </td>
+                </tr>
+                {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="6" style="text-align:center"><strong> No Open Comments </strong></td>
+            </tr>
+        {% endif %}
+        </table>
+    </div>
+</div>
 
 
 {% endblock %}
