@@ -3,18 +3,22 @@
 {% block content %}
 
     <div class="page-header">
-        <h2> Welcome to DRC Tracking Index </h2>
+        <h2> Welcome to DRC Tracking</h2>
     </div>
     <!-- <h2 class="text-center"> Welcome to DRC Tracking Index </h2> -->
     <!-- <br/> -->
            
-    <h3 > QuickLinks: </h3>
-    <h4 ><a href="{% url 'tracking:open_comments' %}">Open Comments</a></h4>
-    <h4 ><a href="{% url 'tracking:subscriptions' %}">Subscribed Drawings</a></h4>
+    <h3> QuickLinks </h3>
+    <div class="list-group" style="box-shadow:none;">
+        <a id="link-list" href="{% url 'tracking:open_comments' %}" class="list-group-item">Open Comments</a>
+        <a id="link-list" href="{% url 'tracking:subscriptions' %}"i class="list-group-item">Subscribed Drawings</a>
+    </div>
 
 
     <h3 > Search: </h3>
-    <h4 ><a href="{% url 'tracking:drawing_search' %}">Drawing Search</a></h4>
+    <div class="list-group" style="box-shadow:none;">
+        <a id="link-list" class="list-group-item" href="{% url 'tracking:drawing_search' %}">Drawing Search</a>
+    </div>
 
     <h3  style="margin-top:50px;"> Add: </h3>
         <ul class="list-inline center-block">

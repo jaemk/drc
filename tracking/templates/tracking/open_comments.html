@@ -2,7 +2,10 @@
 
 {% block content %}
 
-    <h3> Open Comment Search Results </h3>
+<div class="page-header">
+    <h3> Open Comments </h3>
+</div>
+
     <a href="{% url 'tracking:index' %}">Return to Home</a>
     
     <br/>
@@ -19,7 +22,7 @@
     <tr><th> ID </th><th> Date </th><th> Owner </th><th> Description </th><th> On Revs </th><th>No. Replies</th></tr>
     {% if comments %}
         {% for com in comments %}
-        <tr><td><a href="{% url 'tracking:comment_detail' com_id=com.id %}">{{ com.id }} </a></td><td>{{com.add_date|date:"m-d-Y" }}</td><td>{{ com.owner }}</td><td>{{ com.desc }}</td><td>{{ com.revisions }}</td><td>{{ com.number_replies }}</tr>
+        <tr><td><a id="id-link" class="list-group-item" href="{% url 'tracking:comment_detail' com_id=com.id %}">{{ com.id }} </a></td><td>{{com.add_date|date:"m-d-Y" }}</td><td>{{ com.owner }}</td><td>{{ com.desc }}</td><td>{{ com.revisions }}</td><td>{{ com.number_replies }}</tr>
         {% endfor %}
 
     {% else %}
