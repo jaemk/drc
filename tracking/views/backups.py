@@ -48,6 +48,9 @@ def _extract_to_csv(zip_name, zip_path):
         name = table.__name__
         files.append(name+'.csv')
         info = table.objects.all()
+        if not info:
+            continue
+        # print(name, info)
         keys = [k for k in info[0].__dict__.keys() if not k.startswith('_')]
         with open('{}.csv'.format(name), 'w') as fout:
             fout.write(','.join(keys)+'\n')
